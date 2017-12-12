@@ -1,7 +1,7 @@
 Async interface to Koji, using Twisted
 ======================================
 
-Access Koji's XML-RPC API asyncronously (non-blocking) using the Twisted
+Access Koji's XML-RPC API asynchronously (non-blocking) using the Twisted
 framework.
 
 For now this only supports unauthenticated access.
