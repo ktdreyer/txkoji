@@ -1,0 +1,73 @@
+Async interface to Koji, using Twisted
+======================================
+
+Access Koji's XML-RPC API asyncronously (non-blocking) using the Twisted
+framework.
+
+For now this only supports unauthenticated access.
+
+Simple Example: Fetching a user's name
+--------------------------------------
+
+.. code-block:: python
+
+    from txkoji import Connection, KojiException
+    from twisted.internet import defer, reactor
+
+
+    @defer.inlineCallbacks
+    def example():
+        koji = Connection('brew')
+        # fetch a user
+        try:
+            # you may pass an ID or a krb principal here
+            user = yield koji.getUser(3595)
+            # user is a Munch (dict-like) object.
+            print(user.name)
+        except KojiException as e:
+            print(e)
+
+
+    if __name__ == '__main__':
+        example().addCallback(lambda ign: reactor.stop())
+        reactor.run()
+
+Connecting to a Koji Hub
+------------------------
+
+To connect to a Koji hub, create a new ``txkoji.Connection`` instance.
+
+You must pass a string to the constructor. This string is a profile name. For
+example, if you call ``Connector('mykoji')``, then txkoji will search
+``/etc/koji.conf.d/*.conf`` for the ``[mykoji]`` config section. This matches
+what the regular Koji client code does.
+
+Making XML-RPC calls
+--------------------
+
+Koji Hub is an XML-RPC server. You can call any method on the ``Connection``
+class instance and txkoji will treat it as an XML-RPC call to the hub. For
+example, this Twisted ``inlineCallbacks``-style code looks up information about
+a given task ID and tag ID:
+
+.. code-block:: python
+
+    @defer.inlineCallbacks
+    def example():
+        koji = Connection('mykoji')
+
+        task = yield koji.getTaskInfo(10000)
+        print(task.method)  # "createImage"
+
+        tag = yield koji.getTag(2000)
+        print(tag.name)  # "foo-build"
+
+
+To learn the full Koji XML-RPC API, read the `koji source code
+<https://pagure.io/koji/>`_.
+
+
+TODO:
+=====
+* More KojiException subclasses for other possible XML-RPC faults?
+* Implement authentication (low priority)

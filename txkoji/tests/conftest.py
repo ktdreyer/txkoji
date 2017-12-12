@@ -1,0 +1,11 @@
+import os
+import pytest
+
+
+TESTS_DIR = os.path.dirname(os.path.abspath(__file__))
+FIXTURES_DIR = os.path.join(TESTS_DIR, 'fixtures')
+
+
+@pytest.fixture(autouse=True)
+def profile_location(monkeypatch):
+    monkeypatch.setattr('txkoji.PROFILES',  FIXTURES_DIR + '/*.conf')
