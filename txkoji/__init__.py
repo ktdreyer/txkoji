@@ -114,16 +114,14 @@ class Connection(object):
         raises: ``IOError`` when the Twisted XML-RPC connection times out.
         raises: ``KojiException`` if we got a response from the XML-RPC
                 server but it is not one of the ``xmlrpc.Fault``s that
-                we know about (currently none/todo, so this will raise most of
-                the time!).
+                we know about.
         raises: ``Exception`` if it is not one of the above.
         """
         if isinstance(error.value, IOError):
             raise error.value
         if isinstance(error.value, xmlrpc.Fault):
-            # TODO: more errors here?
-            if error.value.faultCode == 1000:
-                # For example, if we called a method that does not exist.
+            # TODO: specific errors here, see koji/__init__.py
+            if error.value.faultCode >= 1000 and error.value.faultCode <= 1022:
                 raise KojiException(error.value.faultString)
             raise KojiException(error.value)
         # We don't know what this is, so just raise it.
