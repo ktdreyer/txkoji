@@ -8,6 +8,7 @@ try:
 except ImportError:
     from ConfigParser import SafeConfigParser
     import xmlrpclib as xmlrpc
+from txkoji.query_factory import KojiQueryFactory
 
 
 __version__ = '0.0.1'
@@ -33,7 +34,8 @@ class Connection(object):
         if not self.url:
             msg = 'no server configured at %s for %s' % (PROFILES, profile)
             raise ValueError(msg)
-        self.proxy = Proxy(self.url.encode())
+        self.proxy = Proxy(self.url.encode(), allowNone=True)
+        self.proxy.queryFactory = KojiQueryFactory
 
     def lookup_hub(self, profile):
         """ Check koji.conf.d files for this profile's Kojihub URL. """

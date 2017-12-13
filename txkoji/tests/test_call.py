@@ -5,7 +5,7 @@ from twisted.internet import defer
 
 
 class _StubProxy(object):
-    def __init__(self, url):
+    def __init__(self, url, **kwargs):
         pass
 
     def callRemote(self, action, payload):
