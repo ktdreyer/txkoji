@@ -70,4 +70,7 @@ To learn the full Koji XML-RPC API, read the `koji source code
 TODO:
 =====
 * More KojiException subclasses for other possible XML-RPC faults?
-* Implement authentication (low priority)
+* Implement authentication (low priority). As `MikeM noted
+  <https://lists.fedorahosted.org/archives/list/koji-devel@lists.fedorahosted.org/message/ICFTEETD5MZMDY4S5FWFTO5LPKIAQIVW/>`_,
+  the callnum parameter will need special handling. (Maybe use Twisted's
+  ``DeferredLock`` to ensure we only have one auth'd RPC in flight at a time?)
