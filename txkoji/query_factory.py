@@ -12,11 +12,11 @@ class KojiQueryFactory(_QueryFactory):
         """
         self.path, self.host = path, host
         self.user, self.password = user, password
-        self.marshaller = KojiMarshaller(allow_none=True)
+        self.marshaller = KojiMarshaller('utf-8', allow_none=True)
         self.payload = payloadTemplate \
             % (method, self.marshaller.dumps(args))
         if isinstance(self.payload, unicode):
-            self.payload = self.payload.encode('utf8')
+            self.payload = self.payload.encode('utf-8')
         self.deferred = defer.Deferred(canceller)
         self.useDateTime = useDateTime
         # Debug the client's XML-RPC payload:
