@@ -14,6 +14,7 @@ except ImportError:
 from txkoji.query_factory import KojiQueryFactory
 from txkoji.task import Task
 from txkoji.build import Build
+from txkoji.package import Package
 
 
 __version__ = '0.0.1'
@@ -180,6 +181,24 @@ class Connection(object):
         if build:
             build.connection = self
         defer.returnValue(build)
+
+    @defer.inlineCallbacks
+    def getPackage(self, name, **kwargs):
+        """
+        Load information about a package and return a custom Package class.
+
+        Calls "getPackage" XML-RPC.
+
+        :param package_id: ``int``, for example 12345
+        :returns: deferred that when fired returns a Package (Munch, dict-like)
+                  object representing this Koji package, or None if no build
+                  was found.
+        """
+        packageinfo = yield self.call('getPackage', name, **kwargs)
+        package = Package.fromDict(packageinfo)
+        if package:
+            package.connection = self
+        defer.returnValue(package)
 
     @defer.inlineCallbacks
     def getTaskDescendents(self, task_id, **kwargs):
