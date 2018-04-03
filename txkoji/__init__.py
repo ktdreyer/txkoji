@@ -258,7 +258,7 @@ class Connection(object):
         else:
             package_data = yield self.getPackage(package)
             if package_data is None:
-                raise ValueError('package "%s" not found' % package)
+                defer.returnValue([])
             package_id = package_data.id
         data = yield self.call('listBuilds', package_id, **kwargs)
         builds = []
