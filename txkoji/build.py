@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta
+from datetime import datetime
 from munch import Munch
 from twisted.internet import defer
 from txkoji import build_states
