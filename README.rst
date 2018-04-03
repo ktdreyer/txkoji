@@ -67,6 +67,15 @@ To learn the full Koji XML-RPC API, read the `koji source code
 <https://pagure.io/koji/>`_.
 
 
+Rich objects
+------------
+
+RPC methods like ``getBuild`` or ``getTaskInfo`` will return special ``Task``
+and ``Build`` classes that inherit from the Munch class. These have their own
+special helper methods to implement things I found interesting, like
+``datetime`` conversions for the start/completion timestamps.
+
+
 TODO:
 =====
 * More KojiException subclasses for other possible XML-RPC faults?

@@ -9,6 +9,8 @@ except ImportError:
     from ConfigParser import SafeConfigParser
     import xmlrpclib as xmlrpc
 from txkoji.query_factory import KojiQueryFactory
+from txkoji.task import Task
+from txkoji.build import Build
 
 
 __version__ = '0.0.1'
@@ -78,6 +80,61 @@ class Connection(object):
         return Call(self, name)
 
     @defer.inlineCallbacks
+    def getBuild(self, build_id, **kwargs):
+        """
+        Load all information about a build and return a custom Build class.
+
+        Calls "getBuild" XML-RPC.
+
+        :param build_id: ``int``, for example 12345
+        :returns: deferred that when fired returns a Build (Munch, dict-like)
+                  object representing this Koji build.
+        """
+        buildinfo = yield self.call('getBuild', build_id, **kwargs)
+        build = Build.fromDict(buildinfo)
+        build.connection = self
+        defer.returnValue(build)
+
+    @defer.inlineCallbacks
+    def getTaskDescendents(self, task_id, **kwargs):
+        """
+        Load all information about a task's descendents into Task classes.
+
+        Calls "getTaskDescendents" XML-RPC (with request=True to get the full
+        information.)
+
+        :param task_id: ``int``, for example 12345, parent task ID
+        :returns: deferred that when fired returns a list of Task (Munch,
+                  dict-like) objects representing Koji tasks.
+        """
+        kwargs['request'] = True
+        data = yield self.call('getTaskDescendents', task_id, **kwargs)
+        tasks = []
+        for tdata in data[str(task_id)]:
+            task = Task.fromDict(tdata)
+            task.connection = self
+            tasks.append(task)
+        defer.returnValue(tasks)
+
+    @defer.inlineCallbacks
+    def getTaskInfo(self, task_id, **kwargs):
+        """
+        Load all information about a task and return a custom Task class.
+
+        Calls "getTaskInfo" XML-RPC (with request=True to get the full
+        information.)
+
+        :param task_id: ``int``, for example 12345
+        :returns: deferred that when fired returns a Task (Munch, dict-like)
+                  object representing this Koji task.
+        """
+        kwargs['request'] = True
+        taskinfo = yield self.call('getTaskInfo', task_id, **kwargs)
+        task = Task.fromDict(taskinfo)
+        task.connection = self
+        defer.returnValue(task)
+
+    @defer.inlineCallbacks
     def listBuilds(self, package, **kwargs):
         """
         Get information about all builds of a package.
@@ -86,8 +143,8 @@ class Connection(object):
         string here for the package name instead of the package ID number.
 
         :param package: ``int`` (packageID) or ``str`` (package name).
-        :returns: deferred that when fired returns an Munch (dict-like) object
-                  representing this package.
+        :returns: deferred that when fired returns a list of Build objects
+                  for this package.
         """
         if isinstance(package, int):
             package_id = package
@@ -96,7 +153,12 @@ class Connection(object):
             if package_data is None:
                 raise ValueError('package "%s" not found' % package)
             package_id = package_data.id
-        builds = yield self.call('listBuilds', package_id, **kwargs)
+        data = yield self.call('listBuilds', package_id, **kwargs)
+        builds = []
+        for bdata in data:
+            build = Build.fromDict(bdata)
+            build.connection = self
+            builds.append(build)
         defer.returnValue(builds)
 
     def _munchify_callback(self, value):
