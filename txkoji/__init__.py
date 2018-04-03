@@ -172,11 +172,13 @@ class Connection(object):
 
         :param build_id: ``int``, for example 12345
         :returns: deferred that when fired returns a Build (Munch, dict-like)
-                  object representing this Koji build.
+                  object representing this Koji build, or None if no build was
+                  found.
         """
         buildinfo = yield self.call('getBuild', build_id, **kwargs)
         build = Build.fromDict(buildinfo)
-        build.connection = self
+        if build:
+            build.connection = self
         defer.returnValue(build)
 
     @defer.inlineCallbacks
@@ -210,12 +212,14 @@ class Connection(object):
 
         :param task_id: ``int``, for example 12345
         :returns: deferred that when fired returns a Task (Munch, dict-like)
-                  object representing this Koji task.
+                  object representing this Koji task, or none if no task was
+                  found.
         """
         kwargs['request'] = True
         taskinfo = yield self.call('getTaskInfo', task_id, **kwargs)
         task = Task.fromDict(taskinfo)
-        task.connection = self
+        if task:
+            task.connection = self
         defer.returnValue(task)
 
     @defer.inlineCallbacks
