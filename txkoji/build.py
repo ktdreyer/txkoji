@@ -61,7 +61,7 @@ class Build(Munch):
         Estimate completion time for a build.
 
         This calls getAverageBuildDuration on the hub for this package. This
-        value is a very rough, an average for all completed builds in the
+        value is a very rough guess, an average for all completed builds in the
         system.
 
         For now this is better than nothing, but I'm recording a few thoughts
