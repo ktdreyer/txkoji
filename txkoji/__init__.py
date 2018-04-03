@@ -1,3 +1,4 @@
+from datetime import timedelta
 from munch import munchify
 from glob import glob
 from twisted.web.xmlrpc import Proxy
@@ -78,6 +79,20 @@ class Connection(object):
 
     def __getattr__(self, name):
         return Call(self, name)
+
+    @defer.inlineCallbacks
+    def getAverageBuildDuration(self, package, **kwargs):
+        """
+        Return a timedelta that Koji considers to be average for this package.
+
+        Calls "getAverageBuildDuration" XML-RPC.
+
+        :param package: ``str``, for example "ceph"
+        :returns: deferred that when fired returns a datetime object for the
+                  estimated duration.
+        """
+        seconds = yield self.call('getAverageBuildDuration', package, **kwargs)
+        defer.returnValue(timedelta(seconds=seconds))
 
     @defer.inlineCallbacks
     def getBuild(self, build_id, **kwargs):

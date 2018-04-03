@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta
+from datetime import datetime
 import os.path
 from urlparse import urlparse
 from munch import Munch
@@ -50,20 +50,6 @@ class Task(Munch):
         return end - start
 
     @defer.inlineCallbacks
-    def average_duration(self):
-        """
-        Return a timedelta that Koji considers to be average for this package.
-
-        Measure the average time between this build's past start and end times.
-
-        :returns: deferred that when fired returns a datetime object for the
-                  estimated duration.
-        """
-        package = self.package()
-        avg_seconds = yield self.connection.getAverageBuildDuration(package)
-        defer.returnValue(timedelta(seconds=avg_seconds))
-
-    @defer.inlineCallbacks
     def estimate_completion(self):
         """
         Estimate completion time for a task.
@@ -80,7 +66,8 @@ class Task(Munch):
             defer.returnValue(subtask_completion)
         if not self.start_ts:
             raise ValueError('no start time, task in %s state' % self.state)
-        avg_delta = yield self.average_duration()
+        package = self.package()
+        avg_delta = yield self.connection.getAverageBuildDuration(package)
         est_completion = self.started + avg_delta
         defer.returnValue(est_completion)
 
@@ -103,7 +90,8 @@ class Task(Munch):
             # Maybe koji has not assigned this task to a worker (over
             # capacity), or maybe makeSRPMfromSCM is still running.
             # Try again in a few minutes?
-            raise ValueError('no running buildArch for task %d' % self.id)
+            raise ValueError('no running %s for task %d' %
+                             (child_method, self.id))
         # Find subtask with the most recent start time:
         build_task = subtasks[0]
         for subtask in subtasks:

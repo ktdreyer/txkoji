@@ -75,6 +75,9 @@ and ``Build`` classes that inherit from the Munch class. These have their own
 special helper methods to implement things I found interesting, like
 ``datetime`` conversions for the start/completion timestamps.
 
+``getAverageBuildDuration`` returns a ``datetime.timedelta`` object instead of
+a raw float, because this is more useful to do time arithmetic.
+
 
 TODO:
 =====

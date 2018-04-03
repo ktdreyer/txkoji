@@ -44,19 +44,6 @@ class Build(Munch):
         return end - self.started
 
     @defer.inlineCallbacks
-    def average_duration(self):
-        """
-        Return a timedelta that Koji considers to be average for this package.
-
-        Measure the average time between this build's past start and end times.
-
-        :returns: deferred that when fired returns a datetime object for the
-                  estimated duration.
-        """
-        avg_seconds = yield self.connection.getAverageBuildDuration(self.name)
-        defer.returnValue(timedelta(seconds=avg_seconds))
-
-    @defer.inlineCallbacks
     def estimate_completion(self):
         """
         Estimate completion time for a build.
@@ -67,6 +54,6 @@ class Build(Munch):
         if self.state != build_states.BUILDING:
             # Build is already complete. Return the exact completion time:
             defer.returnValue(self.completed)
-        avg_delta = yield self.average_duration()
+        avg_delta = yield self.connection.getAverageBuildDuration(self.name)
         est_completion = self.started + avg_delta
         defer.returnValue(est_completion)
