@@ -1,3 +1,4 @@
+import posixpath
 from datetime import datetime
 from munch import Munch
 from twisted.internet import defer
@@ -42,6 +43,17 @@ class Build(Munch):
         else:
             end = datetime.utcnow()
         return end - self.started
+
+    @property
+    def url(self):
+        """
+        Return a kojiweb URL for this resource.
+
+        :returns: ``str``, kojiweb URL like
+                  "http://cbs.centos.org/koji/buildinfo?buildID=21155"
+        """
+        endpoint = 'buildinfo?buildID=%d' % self.build_id
+        return posixpath.join(self.connection.weburl, endpoint)
 
     @defer.inlineCallbacks
     def estimate_completion(self):
