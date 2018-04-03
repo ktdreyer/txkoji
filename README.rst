@@ -70,13 +70,22 @@ To learn the full Koji XML-RPC API, read the `koji source code
 Rich objects
 ------------
 
-RPC methods like ``getBuild`` or ``getTaskInfo`` will return special ``Task``
-and ``Build`` classes that inherit from the Munch class. These have their own
-special helper methods to implement things I found interesting, like
-``datetime`` conversions for the start/completion timestamps.
+The following RPC methods will return special classes that inherit from the
+Munch class:
 
-``getAverageBuildDuration`` returns a ``datetime.timedelta`` object instead of
-a raw float, because this is more useful to do time arithmetic.
+* ``getBuild`` returns ``txkoji.build.Build``
+* ``listBuilds`` returns a ``list`` of ``txkoji.build.Build``
+* ``getTaskInfo`` returns ``txkoji.task.Task``
+* ``getPackage`` returns ``txkoji.package.Package``
+
+These classes have their own special helper methods to implement things I found
+interesting, like ``datetime`` conversions for the start/completion timestamps,
+or ``url`` properties for representing the objects in Kojiweb.
+
+More special return values:
+
+* ``getAverageBuildDuration`` returns a ``datetime.timedelta`` object instead
+  of a raw float, because this is more useful to do time arithmetic.
 
 
 TODO:
