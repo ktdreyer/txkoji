@@ -1,6 +1,8 @@
 from datetime import timedelta
-from munch import munchify
 from glob import glob
+import os
+from urlparse import urlparse, parse_qs
+from munch import munchify
 from twisted.web.xmlrpc import Proxy
 from twisted.internet import defer
 try:
@@ -33,23 +35,90 @@ class Call(object):
 class Connection(object):
 
     def __init__(self, profile):
-        self.url = self.lookup_hub(profile)
+        self.url = self.lookup(profile, 'server')
+        self.weburl = self.lookup(profile, 'weburl')
         if not self.url:
             msg = 'no server configured at %s for %s' % (PROFILES, profile)
             raise ValueError(msg)
         self.proxy = Proxy(self.url.encode(), allowNone=True)
         self.proxy.queryFactory = KojiQueryFactory
 
-    def lookup_hub(self, profile):
-        """ Check koji.conf.d files for this profile's Kojihub URL. """
+    def lookup(self, profile, setting):
+        """ Check koji.conf.d files for this profile's setting.
+
+        :param setting: ``str`` like "server" (for kojihub) or "weburl"
+        :returns: ``str``, value for this setting
+        """
         for path in glob(PROFILES):
             cfg = SafeConfigParser()
             cfg.read(path)
             if profile not in cfg.sections():
                 continue
-            if not cfg.has_option(profile, 'server'):
+            if not cfg.has_option(profile, setting):
                 continue
-            return cfg.get(profile, 'server')
+            return cfg.get(profile, setting)
+
+    @classmethod
+    def connect_from_web(klass, url):
+        """
+        Find a connection that matches this kojiweb URL.
+
+        Check all koji.conf.d files' kojiweb URLs and load the profile that
+        matches the url we pass in here.
+
+        For example, if a user pastes a kojiweb URL into chat, we want to
+        discover the corresponding Koji instance hub automatically.
+
+        :param url: ``str``, for example
+                    "http://cbs.centos.org/koji/buildinfo?buildID=21155"
+        :returns: A "Connection" instance
+        """
+        for path in glob(PROFILES):
+            cfg = SafeConfigParser()
+            cfg.read(path)
+            for profile in cfg.sections():
+                if not cfg.has_option(profile, 'weburl'):
+                    continue
+                weburl = cfg.get(profile, 'weburl')
+                if weburl in url:
+                    return klass(profile)
+
+    @defer.inlineCallbacks
+    def from_web(self, url):
+        """
+        Reverse-engineer a kojiweb URL into an equivalent API response.
+
+        Only a few kojiweb URL endpoints work here.
+
+        See also connect_from_web().
+
+        :param url: ``str``, for example
+                    "http://cbs.centos.org/koji/buildinfo?buildID=21155"
+        :returns: deferred that when fired returns a Munch (dict-like) object
+                  with data about this resource, or None if we could not parse
+                  the url.
+        """
+        o = urlparse(url)
+        endpoint = os.path.basename(o.path)
+        if o.query:
+            query = parse_qs(o.query)
+        result = None
+        # Known Kojiweb endpoints:
+        endpoints = {
+            'buildinfo': ('buildID', self.getBuild),
+            'packageinfo': ('packageID', self.getPackage),
+            'taskinfo': ('taskID', self.getTaskInfo),
+            'taginfo': ('tagID', self.getTag),
+            'targetinfo': ('targetID', self.getTarget),
+            'userinfo': ('userID', self.getUser),
+        }
+        try:
+            (param, method) = endpoints[endpoint]
+            id_ = int(query[param][0])
+            result = yield method(id_)
+        except KeyError:
+            pass
+        defer.returnValue(result)
 
     def call(self, method, *args, **kwargs):
         """
