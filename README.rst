@@ -63,8 +63,12 @@ a given task ID and tag ID:
         print(tag.name)  # "foo-build"
 
 
-To learn the full Koji XML-RPC API, read the `koji source code
-<https://pagure.io/koji/>`_.
+To learn the full Koji XML-RPC API::
+
+  koji list-api
+
+You can also read the `koji source code <https://pagure.io/koji/>`_ to find
+out details about how each method works.
 
 
 Rich objects
