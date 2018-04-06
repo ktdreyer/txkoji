@@ -139,7 +139,7 @@ setup(
     keywords='koji, twisted',
     long_description=LONG_DESCRIPTION,
     classifiers=[
-                 'Development Status :: 5 - Production/Stable',
+                 'Development Status :: 4 - Beta',
                  'Framework :: Twisted',
                  'Intended Audience :: Developers',
                  'License :: OSI Approved :: MIT License',
