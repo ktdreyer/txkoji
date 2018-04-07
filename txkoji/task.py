@@ -134,6 +134,8 @@ class Task(Munch):
         if source.endswith('.src.rpm'):
             srpm = os.path.basename(source)
             (name, version, release) = srpm.rsplit('-', 2)
+            # Note we're throwing away version and release here. They could be
+            # useful eventually, maybe in a "Package" class.
             return name
         # or an allowed SCM:
         elif source.startswith('git://'):
