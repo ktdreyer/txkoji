@@ -70,7 +70,7 @@ class Task(Munch):
             defer.returnValue(subtask_completion)
         if not self.start_ts:
             raise ValueError('no start time, task in %s state' % self.state)
-        package = self.package()
+        package = self.package
         avg_delta = yield self.connection.getAverageBuildDuration(package)
         est_completion = self.started + avg_delta
         defer.returnValue(est_completion)
@@ -120,6 +120,7 @@ class Task(Munch):
             subtasks = [t for t in subtasks if t.state == state]
         defer.returnValue(subtasks)
 
+    @property
     def package(self):
         """
         Find a package name from a build task's parameters.
