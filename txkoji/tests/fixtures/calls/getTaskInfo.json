@@ -1,0 +1,26 @@
+{
+  "weight": 0.2,
+  "parent": null,
+  "channel_id": 1,
+  "request": [
+    "cli-build/1515773778.916323.qZGLNqIz/ceph-ansible-3.1.0beta2-1.el7.src.rpm",
+    "storage7-ceph-jewel-el7",
+    {}
+  ],
+  "start_time": "2018-01-12 16:16:24.65904",
+  "start_ts": 1515773784.65904,
+  "waiting": false,
+  "awaited": null,
+  "label": null,
+  "priority": 20,
+  "completion_time": "2018-01-12 16:18:43.23664",
+  "state": 2,
+  "create_time": "2018-01-12 16:16:19.543",
+  "create_ts": 1515773779.543,
+  "owner": 144,
+  "host_id": 2,
+  "method": "build",
+  "completion_ts": 1515773923.23664,
+  "arch": "noarch",
+  "id": 291929
+}
