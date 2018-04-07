@@ -4,6 +4,10 @@ from urlparse import urlparse
 from munch import Munch
 from twisted.internet import defer
 from txkoji import task_states
+try:
+    import xmlrpc
+except ImportError:
+    import xmlrpclib as xmlrpc
 
 
 class Task(Munch):
@@ -124,7 +128,7 @@ class Task(Munch):
         :raises: ValueError if we could not parse this tasks's request params.
         """
         # (I wish there was a better way to do this.)
-        source = self.request[0]
+        source = self.params[0]
         # build tasks can load an SRPM from a "cli-build" tmpdir:
         if source.endswith('.src.rpm'):
             srpm = os.path.basename(source)
@@ -136,3 +140,18 @@ class Task(Munch):
             package = os.path.basename(o.path)
             return package
         raise ValueError('could not parse source "%s"' % source)
+
+    @property
+    def params(self):
+        """
+        Return a list of parameters in this task's request.
+
+        If self.request is already a list, simply return it.
+
+        If self.request is a raw XML-RPC string, parse it and return the
+        params.
+        """
+        if isinstance(self.request, list):
+            return self.request
+        (params, _) = xmlrpc.loads(self.request)
+        return params
