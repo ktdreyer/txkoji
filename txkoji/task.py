@@ -1,5 +1,6 @@
 from datetime import datetime
 import os.path
+import posixpath
 from urlparse import urlparse
 from munch import Munch
 from twisted.internet import defer
@@ -168,3 +169,14 @@ class Task(Munch):
                 if param.get('scratch'):
                     return True
         return False
+
+    @property
+    def url(self):
+        """
+        Return a kojiweb URL for this resource.
+
+        :returns: ``str``, kojiweb URL like
+                  "http://cbs.centos.org/koji/taskinfo?taskID=381617"
+        """
+        endpoint = 'taskinfo?taskID=%d' % self.id
+        return posixpath.join(self.connection.weburl, endpoint)
