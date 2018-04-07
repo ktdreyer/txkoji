@@ -1,6 +1,9 @@
 Async interface to Koji, using Twisted
 ======================================
 
+.. image:: https://badge.fury.io/py/txkoji.svg
+             :target: https://badge.fury.io/py/txkoji
+
 Access Koji's XML-RPC API asynchronously (non-blocking) using the Twisted
 framework.
 
