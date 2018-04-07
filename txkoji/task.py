@@ -155,3 +155,11 @@ class Task(Munch):
             return self.request
         (params, _) = xmlrpc.loads(self.request)
         return params
+
+    @property
+    def is_scratch(self):
+        for param in self.params:
+            if isinstance(param, dict):
+                if param.get('scratch'):
+                    return True
+        return False
