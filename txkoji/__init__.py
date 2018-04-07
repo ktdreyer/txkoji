@@ -268,6 +268,26 @@ class Connection(object):
             builds.append(build)
         defer.returnValue(builds)
 
+    @defer.inlineCallbacks
+    def listTasks(self, opts={}, queryOpts={}):
+        """
+        Get information about all Koji tasks.
+
+        Calls "listTasks" XML-RPC.
+
+        :param opts: ``dict``. Eg. {'state': [task_states.OPEN]}
+        :param queryOpts: ``dict``. Eg. {'order' : 'priority,create_time'}
+        :returns: deferred that when fired returns a list of Task objects.
+        """
+        opts['decode'] = True  # decode xmlrpc data in "request"
+        data = yield self.call('listTasks', opts, queryOpts)
+        tasks = []
+        for tdata in data:
+            task = Task.fromDict(tdata)
+            task.connection = self
+            tasks.append(task)
+        defer.returnValue(tasks)
+
     def _munchify_callback(self, value):
         """
         Fires when we get user information back from the XML-RPC server.
