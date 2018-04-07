@@ -131,6 +131,7 @@ class Task(Munch):
         """
         # (I wish there was a better way to do this.)
         source = self.params[0]
+        o = urlparse(source)
         # build tasks can load an SRPM from a "cli-build" tmpdir:
         if source.endswith('.src.rpm'):
             srpm = os.path.basename(source)
@@ -139,8 +140,7 @@ class Task(Munch):
             # useful eventually, maybe in a "Package" class.
             return name
         # or an allowed SCM:
-        elif source.startswith('git://'):
-            o = urlparse(source)
+        elif o.scheme:
             package = os.path.basename(o.path)
             if package.endswith('.git'):
                 return package[:-4]
