@@ -138,6 +138,8 @@ class Task(Munch):
         elif source.startswith('git://'):
             o = urlparse(source)
             package = os.path.basename(o.path)
+            if package.endswith('.git'):
+                return package[:-4]
             return package
         raise ValueError('could not parse source "%s"' % source)
 
