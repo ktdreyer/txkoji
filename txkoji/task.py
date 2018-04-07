@@ -25,7 +25,7 @@ class Task(Munch):
         """
         Return a parsed started datetime for a task.
 
-        :returns: a datetime object for the time this build started
+        :returns: a datetime object for the time this task started
         """
         if not self.start_ts:
             return None
@@ -34,9 +34,9 @@ class Task(Munch):
     @property
     def duration(self):
         """
-        Return a timedelta for this build.
+        Return a timedelta for this task.
 
-        Measure the time between this build's start and end time, or "now"
+        Measure the time between this task's start and end time, or "now"
         if the task has not yet finished.
 
         :returns: timedelta object, or None if the task has not even started.
