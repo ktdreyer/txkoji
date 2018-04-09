@@ -1,3 +1,4 @@
+from twisted.python.compat import long
 try:
     import xmlrpc
     from xmlrpc.client import Marshaller
