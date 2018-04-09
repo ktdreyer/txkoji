@@ -4,6 +4,11 @@ import subprocess
 import sys
 from setuptools.command.test import test as TestCommand
 from setuptools import setup, Command
+try:
+    # Python 2 backwards compat
+    from __builtin__ import raw_input as input
+except ImportError:
+    pass
 
 readme = os.path.join(os.path.dirname(__file__), 'README.rst')
 LONG_DESCRIPTION = open(readme).read()
@@ -37,7 +42,7 @@ class BumpCommand(Command):
         try:
             print('old version: %s  new version: %s' %
                   (metadata['version'], '.'.join(version)))
-            raw_input('Press enter to confirm, or ctrl-c to exit >')
+            input('Press enter to confirm, or ctrl-c to exit >')
         except KeyboardInterrupt:
             raise SystemExit("\nNot proceeding")
 
