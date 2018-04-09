@@ -1,4 +1,5 @@
 from twisted.web.xmlrpc import _QueryFactory, payloadTemplate
+from twisted.python.compat import unicode
 from twisted.internet import defer
 from txkoji.marshaller import KojiMarshaller
 
