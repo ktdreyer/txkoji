@@ -18,7 +18,7 @@ from txkoji.build import Build
 from txkoji.package import Package
 
 
-__version__ = '0.1.0'
+__version__ = '0.2.0'
 
 
 PROFILES = '/etc/koji.conf.d/*.conf'
