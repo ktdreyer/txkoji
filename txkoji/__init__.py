@@ -1,15 +1,16 @@
 from datetime import timedelta
 from glob import glob
 import os
-from urlparse import urlparse, parse_qs
 from munch import munchify
 from twisted.web.xmlrpc import Proxy
 from twisted.internet import defer
 try:
     from configparser import SafeConfigParser
+    from urllib.parse import urlparse, parse_qs
     import xmlrpc
 except ImportError:
     from ConfigParser import SafeConfigParser
+    from urlparse import urlparse, parse_qs
     import xmlrpclib as xmlrpc
 from txkoji.query_factory import KojiQueryFactory
 from txkoji.task import Task

@@ -1,13 +1,14 @@
 from datetime import datetime
 import os.path
 import posixpath
-from urlparse import urlparse
 from munch import Munch
 from twisted.internet import defer
 from txkoji import task_states
 try:
+    from urllib.parse import urlparse
     import xmlrpc
 except ImportError:
+    from urlparse import urlparse
     import xmlrpclib as xmlrpc
 
 
