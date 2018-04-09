@@ -1,12 +1,14 @@
 try:
     import xmlrpc
+    from xmlrpc.client import Marshaller
 except ImportError:
     import xmlrpclib as xmlrpc
+    from xmlrpclib import Marshaller
 
 
-class KojiMarshaller(xmlrpc.Marshaller):
+class KojiMarshaller(Marshaller):
     """ Custom XML-RPC Marshaller for long ints. """
-    dispatch = xmlrpc.Marshaller.dispatch.copy()
+    dispatch = Marshaller.dispatch.copy()
 
     MAXI8 = 2 ** 63 - 1
     MINI8 = -2 ** 63
@@ -20,7 +22,7 @@ class KojiMarshaller(xmlrpc.Marshaller):
             write(str(int(value)))
             write("</i8></value>\n")
         else:
-            return xmlrpc.Marshaller.dump_int(self, value, write)
+            return Marshaller.dump_int(self, value, write)
 
     dispatch[int] = dump_int
     dispatch[long] = dump_int
