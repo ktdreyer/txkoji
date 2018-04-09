@@ -2,7 +2,7 @@ import os
 import pytest
 
 
-#pytest_plugins = "pytest_twisted"
+# pytest_plugins = "pytest_twisted"
 
 
 TESTS_DIR = os.path.dirname(os.path.abspath(__file__))

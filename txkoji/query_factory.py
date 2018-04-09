@@ -22,7 +22,7 @@ class KojiQueryFactory(_QueryFactory):
         # Debug the client's XML-RPC payload:
         # print(self.payload)
 
-    #def parseResponse(self, contents):
-    #    """ Debugging: print the server's response to STDOUT. """
-    #    print(contents)
-    #    return _QueryFactory.parseResponse(self, contents)
+    # def parseResponse(self, contents):
+    #     """ Debugging: print the server's response to STDOUT. """
+    #     print(contents)
+    #     return _QueryFactory.parseResponse(self, contents)
