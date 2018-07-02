@@ -105,3 +105,8 @@ TODO:
   <https://lists.fedorahosted.org/archives/list/koji-devel@lists.fedorahosted.org/message/ICFTEETD5MZMDY4S5FWFTO5LPKIAQIVW/>`_,
   the callnum parameter will need special handling. (Maybe use Twisted's
   ``DeferredLock`` to ensure we only have one auth'd RPC in flight at a time?)
+
+Packages that use this package
+==============================
+
+* `helga-koji <https://github.com/ktdreyer/helga-koji>`_
