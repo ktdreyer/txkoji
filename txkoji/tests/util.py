@@ -35,7 +35,7 @@ class FakeSSLLoginResponse(object):
         if self.code == 200:
             filename = 'ssllogin/sslLogin.xml'
             fixture = os.path.join(FIXTURES_DIR, 'requests', filename)
-            with open(fixture) as fp:
+            with open(fixture, 'rb') as fp:
                 result = fp.read()
             return defer.succeed(result)
-        return defer.succeed('HTTP error')
+        return defer.succeed(b'HTTP error')
