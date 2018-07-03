@@ -179,11 +179,12 @@ class Connection(object):
 
         :return: a path suitable for twisted.web.xmlrpc.Proxy
         """
-        basepath = self.proxy.path.split('?')[0]
+        basepath = self.proxy.path.decode().split('?')[0]
         params = urlencode({'session-id': self.session_id,
                             'session-key': self.session_key,
                             'callnum': self.callnum})
-        return '%s?%s' % (basepath, params)
+        result = '%s?%s' % (basepath, params)
+        return result.encode('utf-8')
 
     def __getattr__(self, name):
         return Call(self, name)
