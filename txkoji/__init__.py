@@ -371,7 +371,6 @@ class Connection(object):
         payload = factory.payload
         try:
             response = yield treq_kerberos.post(url, data=payload, auth=auth)
-            print('received response')
         except ResponseFailed as e:
             failure = e.reasons[0]
             failure.raiseException()
