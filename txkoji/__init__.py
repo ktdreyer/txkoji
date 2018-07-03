@@ -380,7 +380,10 @@ class Connection(object):
             raise KojiGssapiException('HTTP %d error' % response.code)
         # Process the XML-RPC response content from treq.
         content = yield response.content()
-        result = xmlrpc.loads(content)[0][0]
+        if hasattr(xmlrpc, 'loads'):  # Python 2:
+            result = xmlrpc.loads(content)[0][0]
+        else:
+            result = xmlrpc.client.loads(content)[0][0]
         defer.returnValue(result)
 
     def _munchify_callback(self, value):
