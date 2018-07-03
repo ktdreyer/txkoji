@@ -410,7 +410,11 @@ class Connection(object):
         """
         if isinstance(error.value, IOError):
             raise error.value
-        if isinstance(error.value, xmlrpc.Fault):
+        if hasattr(xmlrpc, 'Fault'):  # Python 2:
+            fault = xmlrpc.Fault
+        else:
+            fault = xmlrpc.client.Fault
+        if isinstance(error.value, fault):
             # TODO: specific errors here, see koji/__init__.py
             if error.value.faultCode >= 1000 and error.value.faultCode <= 1022:
                 raise KojiException(error.value.faultString)
