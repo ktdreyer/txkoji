@@ -362,7 +362,7 @@ class Connection(object):
 
         :returns: deferred that when fired returns a dict from sslLogin
         """
-        auth = treq_kerberos.TreqKerberosAuth()
+        auth = treq_kerberos.TreqKerberosAuth(force_preemptive=True)
         # Hit the special "/ssllogin" URL that's behind mod_auth_kerb:
         url = self.url + '/ssllogin'
         # Build the XML-RPC HTTP request body by hand and send it with
