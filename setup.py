@@ -158,6 +158,7 @@ setup(
         'pyOpenSSL',  # for Kojis that use HTTPS
         'service_identity',  # for Kojis that use HTTPS
         'pyasn1',  # for Kojis that use HTTPS
+        'treq-kerberos',
         'twisted',
     ],
     tests_require=[

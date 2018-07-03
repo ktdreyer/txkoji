@@ -10,7 +10,7 @@ Async interface to Koji, using Twisted
 Access Koji's XML-RPC API asynchronously (non-blocking) using the Twisted
 framework.
 
-For now this only supports unauthenticated access.
+For now this supports unauthenticated access or the GSSAPI login method.
 
 Simple Example: Fetching a user's name
 --------------------------------------
@@ -77,6 +77,27 @@ You can also read the `koji source code <https://pagure.io/koji/>`_ to find
 out details about how each method works.
 
 
+Logging in
+----------
+
+Your Koji hub must support GSSAPI authentication, and you must have a valid
+Kerberos ticket.
+
+.. code-block:: python
+
+    @defer.inlineCallbacks
+    def example():
+        koji = Connection('mykoji')
+
+        result = yield login()
+        print(result)  # "True"
+        print('session-id: %s' % koji.session_id)
+
+        # "Who am I?"
+        user = yield koji.getLoggedInUser()
+        print(user)
+
+
 Rich objects
 ------------
 
@@ -101,10 +122,13 @@ More special return values:
 TODO:
 =====
 * More KojiException subclasses for other possible XML-RPC faults?
-* Implement authentication (low priority). As `MikeM noted
+* Implement krbV and SSL client authentication (low priority).
+* `MikeM noted
   <https://lists.fedorahosted.org/archives/list/koji-devel@lists.fedorahosted.org/message/ICFTEETD5MZMDY4S5FWFTO5LPKIAQIVW/>`_,
-  the callnum parameter will need special handling. (Maybe use Twisted's
-  ``DeferredLock`` to ensure we only have one auth'd RPC in flight at a time?)
+  the callnum parameter will need special handling. We might need Twisted's
+  ``DeferredLock`` to ensure we only have one auth'd RPC in flight at a time.
+  It's not really clear to me if we can actually hit a callnum error here. More
+  integration testing needed for this.
 
 Packages that use this package
 ==============================

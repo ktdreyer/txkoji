@@ -2,14 +2,17 @@ from datetime import timedelta
 from glob import glob
 import os
 from munch import munchify
+import treq_kerberos
 from twisted.web.xmlrpc import Proxy
 from twisted.internet import defer
+from twisted.web.client import ResponseFailed
 try:
     from configparser import SafeConfigParser
-    from urllib.parse import urlparse, parse_qs
+    from urllib.parse import urlencode, urlparse, parse_qs
     import xmlrpc
 except ImportError:
     from ConfigParser import SafeConfigParser
+    from urllib import urlencode
     from urlparse import urlparse, parse_qs
     import xmlrpclib as xmlrpc
 from txkoji.query_factory import KojiQueryFactory
@@ -42,6 +45,7 @@ class Call(object):
 class Connection(object):
 
     def __init__(self, profile):
+        self.profile = profile
         self.url = self.lookup(profile, 'server')
         self.weburl = self.lookup(profile, 'weburl')
         if not self.url:
@@ -49,6 +53,10 @@ class Connection(object):
             raise ValueError(msg)
         self.proxy = Proxy(self.url.encode(), allowNone=True)
         self.proxy.queryFactory = KojiQueryFactory
+        # We populate these on login:
+        self.session_id = None
+        self.session_key = None
+        self.callnum = None
 
     def lookup(self, profile, setting):
         """ Check koji.conf.d files for this profile's setting.
@@ -129,8 +137,10 @@ class Connection(object):
 
     def call(self, method, *args, **kwargs):
         """
-        Make an XML-RPC call to the server. This method does not auth to the
-        server (TODO).
+        Make an XML-RPC call to the server.
+
+        If this client is logged in (with login()), this call will be
+        authenticated.
 
         Koji has its own custom implementation of XML-RPC that supports named
         args (kwargs). For example, to use the "queryOpts" kwarg:
@@ -148,10 +158,32 @@ class Connection(object):
         if kwargs:
             kwargs['__starstar'] = True
             args = args + (kwargs,)
+        if self.session_id:
+            self.proxy.path = self._authenticated_path()
         d = self.proxy.callRemote(method, *args)
         d.addCallback(self._munchify_callback)
         d.addErrback(self._parse_errback)
+        if self.callnum is not None:
+            self.callnum += 1
         return d
+
+    def _authenticated_path(self):
+        """
+        Get the path of our XML-RPC endpoint with session auth params added.
+
+        For example:
+          /kojihub?session-id=123456&session-key=1234-asdf&callnum=0
+
+        If we're making an authenticated request, we must add these session
+        parameters to the hub's XML-RPC endpoint.
+
+        :return: a path suitable for twisted.web.xmlrpc.Proxy
+        """
+        basepath = self.proxy.path.split('?')[0]
+        params = urlencode({'session-id': self.session_id,
+                            'session-key': self.session_key,
+                            'callnum': self.callnum})
+        return '%s?%s' % (basepath, params)
 
     def __getattr__(self, name):
         return Call(self, name)
@@ -294,6 +326,63 @@ class Connection(object):
             tasks.append(task)
         defer.returnValue(tasks)
 
+    @defer.inlineCallbacks
+    def login(self):
+        """
+        Return True if we successfully logged into this Koji hub.
+
+        We only support GSSAPI auth for now.
+
+        :returns: deferred that when fired returns True
+        """
+        authtype = self.lookup(self.profile, 'authtype')
+        if authtype is None:
+            cert = self.lookup(self.profile, 'cert')
+            if cert and os.path.isfile(os.path.expanduser(cert)):
+                authtype = 'ssl'
+            # Note: official koji cli is a little more lax here. If authtype is
+            # None and we have a valid kerberos ccache, we still try kerberos
+            # auth.
+        if authtype == 'kerberos':
+            # Note: we don't try the old-style kerberos login here.
+            result = yield self._gssapi_login()
+        else:
+            raise NotImplementedError('non-kerberos auth: %s' % authtype)
+        self.session_id = result['session-id']
+        self.session_key = result['session-key']
+        self.callnum = 0  # increment this on every call for this session.
+        defer.returnValue(True)
+
+    @defer.inlineCallbacks
+    def _gssapi_login(self):
+        """
+        Authenticate to the /ssllogin endpoint with GSSAPI authentication.
+
+        Raises KojiGssapiException if this fails.
+
+        :returns: deferred that when fired returns a dict from sslLogin
+        """
+        auth = treq_kerberos.TreqKerberosAuth()
+        # Hit the special "/ssllogin" URL that's behind mod_auth_kerb:
+        url = self.url + '/ssllogin'
+        # Build the XML-RPC HTTP request body by hand and send it with
+        # treq-kerberos.
+        factory = KojiQueryFactory(path=None, host=None, method='sslLogin')
+        payload = factory.payload
+        try:
+            response = yield treq_kerberos.post(url, data=payload, auth=auth)
+            print('received response')
+        except ResponseFailed as e:
+            failure = e.reasons[0]
+            failure.raiseException()
+            # raise KojiGssapiException(failure.value)
+        if response.code > 200:
+            raise KojiGssapiException('HTTP %d error' % response.code)
+        # Process the XML-RPC response content from treq.
+        content = yield response.content()
+        result = xmlrpc.loads(content)[0][0]
+        defer.returnValue(result)
+
     def _munchify_callback(self, value):
         """
         Fires when we get user information back from the XML-RPC server.
@@ -328,4 +417,8 @@ class Connection(object):
 
 
 class KojiException(Exception):
+    pass
+
+
+class KojiGssapiException(Exception):
     pass

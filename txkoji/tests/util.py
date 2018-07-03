@@ -22,3 +22,20 @@ class FakeProxy(object):
             print('koji call %s ... --json-output > %s' % (action, fixture))
             raise
         return defer.succeed(result)
+
+
+class FakeSSLLoginResponse(object):
+    """ Fake response from treq, for testing HTTP login """
+    def __init__(self, url, code=200):
+        self.url = url
+        self.code = code
+
+    def content(self):
+        assert 'ssllogin' in self.url
+        if self.code == 200:
+            filename = 'ssllogin/sslLogin.xml'
+            fixture = os.path.join(FIXTURES_DIR, 'requests', filename)
+            with open(fixture) as fp:
+                result = fp.read()
+            return defer.succeed(result)
+        return defer.succeed('HTTP error')
