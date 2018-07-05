@@ -10,7 +10,7 @@ Async interface to Koji, using Twisted
 Access Koji's XML-RPC API asynchronously (non-blocking) using the Twisted
 framework.
 
-For now this supports unauthenticated access or the GSSAPI login method.
+This supports the GSSAPI or Client SSL login methods.
 
 Simple Example: Fetching a user's name
 --------------------------------------
@@ -80,8 +80,8 @@ out details about how each method works.
 Logging in
 ----------
 
-Your Koji hub must support GSSAPI authentication, and you must have a valid
-Kerberos ticket.
+Your Koji hub must support GSSAPI or Client SSL authentication. You must have a
+valid Kerberos ticket or SSL keypair.
 
 .. code-block:: python
 
