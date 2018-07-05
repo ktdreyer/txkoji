@@ -122,7 +122,8 @@ More special return values:
 TODO:
 =====
 * More KojiException subclasses for other possible XML-RPC faults?
-* Implement krbV and SSL client authentication (low priority).
+* Implement krbV authentication (probably not unless there is an alternative to
+  python-krbV).
 * `MikeM noted
   <https://lists.fedorahosted.org/archives/list/koji-devel@lists.fedorahosted.org/message/ICFTEETD5MZMDY4S5FWFTO5LPKIAQIVW/>`_,
   the callnum parameter will need special handling. We might need Twisted's

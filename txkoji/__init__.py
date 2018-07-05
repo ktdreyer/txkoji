@@ -2,10 +2,15 @@ from datetime import timedelta
 from glob import glob
 import os
 from munch import munchify
+import treq
 import treq_kerberos
 from twisted.web.xmlrpc import Proxy
 from twisted.internet import defer
+from twisted.internet import reactor
+from twisted.internet.ssl import PrivateCertificate
+from twisted.web.client import Agent
 from twisted.web.client import ResponseFailed
+from txkoji.ssl import ClientCertPolicy, RootCATrustRoot
 try:
     from configparser import SafeConfigParser
     from urllib.parse import urlencode, urlparse, parse_qs
@@ -332,7 +337,8 @@ class Connection(object):
         """
         Return True if we successfully logged into this Koji hub.
 
-        We only support GSSAPI auth for now.
+        We support GSSAPI and SSL Client authentication (not the old-style
+        krb-over-xmlrpc krbLogin method).
 
         :returns: deferred that when fired returns True
         """
@@ -347,37 +353,80 @@ class Connection(object):
         if authtype == 'kerberos':
             # Note: we don't try the old-style kerberos login here.
             result = yield self._gssapi_login()
+        elif authtype == 'ssl':
+            result = yield self._ssl_login()
         else:
-            raise NotImplementedError('non-kerberos auth: %s' % authtype)
+            raise NotImplementedError('unsupported auth: %s' % authtype)
         self.session_id = result['session-id']
         self.session_key = result['session-key']
         self.callnum = 0  # increment this on every call for this session.
         defer.returnValue(True)
 
-    @defer.inlineCallbacks
     def _gssapi_login(self):
         """
         Authenticate to the /ssllogin endpoint with GSSAPI authentication.
 
-        Raises KojiGssapiException if this fails.
+        :returns: deferred that when fired returns a dict from sslLogin
+        """
+        method = treq_kerberos.post
+        auth = treq_kerberos.TreqKerberosAuth(force_preemptive=True)
+        return self._request_login(method, auth=auth)
+
+    def _ssl_agent(self):
+        """
+        Get a Twisted Agent that performs Client SSL authentication for Koji.
+        """
+        # Load "cert" into a PrivateCertificate.
+        certfile = self.lookup(self.profile, 'cert')
+        certfile = os.path.expanduser(certfile)
+        with open(certfile) as certfp:
+            pemdata = certfp.read()
+            client_cert = PrivateCertificate.loadPEM(pemdata)
+
+        trustRoot = None  # Use Twisted's platformTrust().
+        # Optionally load "serverca" into a Certificate.
+        servercafile = self.lookup(self.profile, 'serverca')
+        if servercafile:
+            servercafile = os.path.expanduser(servercafile)
+            trustRoot = RootCATrustRoot(servercafile)
+
+        policy = ClientCertPolicy(trustRoot=trustRoot, client_cert=client_cert)
+        return Agent(reactor, policy)
+
+    def _ssl_login(self):
+        """
+        Authenticate to the /ssllogin endpoint with Client SSL authentication.
 
         :returns: deferred that when fired returns a dict from sslLogin
         """
-        auth = treq_kerberos.TreqKerberosAuth(force_preemptive=True)
-        # Hit the special "/ssllogin" URL that's behind mod_auth_kerb:
+        method = treq.post
+        agent = self._ssl_agent()
+        return self._request_login(method, agent=agent)
+
+    @defer.inlineCallbacks
+    def _request_login(self, method, **kwargs):
+        """
+        Send a treq HTTP POST request to /ssllogin
+
+        :param method: treq method to use, for example "treq.post" or
+                       "treq_kerberos.post".
+        :param kwargs: kwargs to pass to treq or treq_kerberos, for example
+                       "auth" or "agent".
+
+        :returns: deferred that when fired returns a dict from sslLogin
+        """
         url = self.url + '/ssllogin'
         # Build the XML-RPC HTTP request body by hand and send it with
-        # treq-kerberos.
+        # treq.
         factory = KojiQueryFactory(path=None, host=None, method='sslLogin')
         payload = factory.payload
         try:
-            response = yield treq_kerberos.post(url, data=payload, auth=auth)
+            response = yield method(url, data=payload, **kwargs)
         except ResponseFailed as e:
             failure = e.reasons[0]
             failure.raiseException()
-            # raise KojiGssapiException(failure.value)
         if response.code > 200:
-            raise KojiGssapiException('HTTP %d error' % response.code)
+            raise KojiLoginException('HTTP %d error' % response.code)
         # Process the XML-RPC response content from treq.
         content = yield response.content()
         if hasattr(xmlrpc, 'loads'):  # Python 2:
@@ -427,5 +476,5 @@ class KojiException(Exception):
     pass
 
 
-class KojiGssapiException(Exception):
+class KojiLoginException(Exception):
     pass

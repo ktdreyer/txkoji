@@ -2,7 +2,7 @@ from munch import Munch
 import pytest
 from twisted.internet import defer
 from txkoji import Connection
-from txkoji import KojiGssapiException
+from txkoji import KojiLoginException
 from txkoji.tests.util import FakeSSLLoginResponse
 from txkoji.tests.util import FakeProxy
 
@@ -34,7 +34,7 @@ class TestLogin(object):
     def test_login_failure(self, monkeypatch):
         monkeypatch.setattr('treq_kerberos.post', fake_post_unauthorized)
         koji = Connection('mykoji')
-        with pytest.raises(KojiGssapiException):
+        with pytest.raises(KojiLoginException):
             yield koji.login()
 
     @pytest.inlineCallbacks
