@@ -159,6 +159,8 @@ class Task(Munch):
         """
         if self.method == 'buildNotification':
             return self.params[1]['name']
+        if self.method in ('createImage', 'image'):
+            return self.params[0]
         # params[0] is the source URL for these tasks:
         if self.method not in ('build', 'buildArch', 'buildContainer',
                                'buildMaven', 'buildSRPMFromSCM'):
