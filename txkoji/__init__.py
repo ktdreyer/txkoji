@@ -26,7 +26,7 @@ from txkoji.build import Build
 from txkoji.package import Package
 
 
-__version__ = '0.4.1'
+__version__ = '0.5.0'
 
 
 PROFILES = '/etc/koji.conf.d/*.conf'
