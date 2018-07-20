@@ -110,8 +110,12 @@ Munch class:
 * ``getPackage`` returns ``txkoji.package.Package``
 
 These classes have their own special helper methods to implement things I found
-interesting, like ``datetime`` conversions for the start/completion timestamps,
-or ``url`` properties for representing the objects in Kojiweb.
+interesting:
+
+* ``datetime`` conversions for the start/completion timestamps,
+* ``url`` properties for representing the objects in Kojiweb,
+* Unified property attributes across task methods, like ``tag``, ``package`` or
+  ``is_scratch``.
 
 More special return values:
 
