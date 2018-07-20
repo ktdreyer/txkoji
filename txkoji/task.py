@@ -24,7 +24,7 @@ class Task(Munch):
         """
         if self.method == 'buildArch':
             return self.params[2]
-        if self.method == 'createrepo':
+        if self.method in ('createrepo', 'runroot'):
             return self.params[1]
 
     @property
