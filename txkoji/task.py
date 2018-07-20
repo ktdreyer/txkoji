@@ -143,6 +143,10 @@ class Task(Munch):
         :returns: name of the package this build task is building.
         :raises: ValueError if we could not parse this tasks's request params.
         """
+        # params[0] is the source URL for these tasks:
+        if self.method not in ('build', 'buildArch', 'buildContainer',
+                               'buildMaven', 'buildSRPMFromSCM'):
+            return None
         # (I wish there was a better way to do this.)
         source = self.params[0]
         o = urlparse(source)
