@@ -28,6 +28,20 @@ class Task(Munch):
             return self.params[1]
 
     @property
+    def arches(self):
+        """
+        Return a list of architectures for this task.
+
+        :returns: a list of arch strings (eg ["ppc64le", "x86_64"]). The list
+                  is empty if this task has no arches associated with it.
+        """
+        if self.method == 'image':
+            return self.params[2]
+        if self.arch:
+            return [self.arch]
+        return []
+
+    @property
     def completed(self):
         """
         Return a parsed completion datetime for a task.
