@@ -107,7 +107,7 @@ class Task(Munch):
                                           state=task_states.OPEN)
         if not subtasks:
             # Maybe koji has not assigned this task to a worker (over
-            # capacity), or maybe makeSRPMfromSCM is still running.
+            # capacity), or maybe makeSRPMFromSCM is still running.
             # Try again in a few minutes?
             raise ValueError('no running %s for task %d' %
                              (child_method, self.id))
