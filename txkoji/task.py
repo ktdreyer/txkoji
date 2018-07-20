@@ -207,6 +207,35 @@ class Task(Munch):
         return False
 
     @property
+    def tag(self):
+        """
+        Return the tag's name (or id number) for this task.
+
+        :returns: An int (tag id) or string (tag name, eg "foo-build").
+                  This seems to depend on the task method. For example,
+                  buildArch tasks always return a tag ID here.
+                  If you do get an int back here, you'll have to make a
+                  separate getTag RPC to get the tag's name.
+        """
+        if self.method in ('buildArch', 'buildMaven'):
+            # Note: buildArch tag will be an int here.
+            return self.params[1]
+        if self.method in ('newRepo', 'runroot'):
+            return self.params[0]
+
+    @property
+    def target(self):
+        if self.method in ('build', 'buildContainer'):
+            return self.params[1]
+        if self.method == 'buildNotification':
+            if self.params[2]:
+                return self.params[2]['name']
+        if self.method == 'createImage':
+            return self.params[0]
+        if self.method == 'image':
+            return self.params[3]
+
+    @property
     def url(self):
         """
         Return a kojiweb URL for this resource.
