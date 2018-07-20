@@ -1,7 +1,7 @@
 from datetime import datetime
 import os.path
 import posixpath
-from munch import Munch
+from munch import Munch, unmunchify
 from twisted.internet import defer
 from txkoji import task_states
 try:
@@ -194,7 +194,7 @@ class Task(Munch):
         params.
         """
         if isinstance(self.request, list):
-            return self.request
+            return unmunchify(self.request)
         (params, _) = xmlrpc.loads(self.request)
         return params
 
