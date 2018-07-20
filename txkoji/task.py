@@ -157,6 +157,8 @@ class Task(Munch):
         :returns: name of the package this build task is building.
         :raises: ValueError if we could not parse this tasks's request params.
         """
+        if self.method == 'buildNotification':
+            return self.params[1]['name']
         # params[0] is the source URL for these tasks:
         if self.method not in ('build', 'buildArch', 'buildContainer',
                                'buildMaven', 'buildSRPMFromSCM'):
