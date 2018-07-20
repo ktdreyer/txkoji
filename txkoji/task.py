@@ -15,6 +15,19 @@ except ImportError:
 class Task(Munch):
 
     @property
+    def arch(self):
+        """
+        Return an architecture for this task.
+
+        :returns: an arch string (eg "noarch", or "ppc64le"), or None this task
+                  has no architecture associated with it.
+        """
+        if self.method == 'buildArch':
+            return self.params[2]
+        if self.method == 'createrepo':
+            return self.params[1]
+
+    @property
     def completed(self):
         """
         Return a parsed completion datetime for a task.
