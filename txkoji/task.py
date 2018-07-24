@@ -163,7 +163,7 @@ class Task(Munch):
             return self.params[0]
         # params[0] is the source URL for these tasks:
         if self.method not in ('build', 'buildArch', 'buildContainer',
-                               'buildMaven', 'buildSRPMFromSCM'):
+                               'buildMaven', 'buildSRPMFromSCM', 'maven'):
             return None
         # (I wish there was a better way to do this.)
         source = self.params[0]
@@ -225,7 +225,7 @@ class Task(Munch):
 
     @property
     def target(self):
-        if self.method in ('build', 'buildContainer'):
+        if self.method in ('build', 'buildContainer', 'maven'):
             return self.params[1]
         if self.method == 'buildNotification':
             if self.params[2]:
