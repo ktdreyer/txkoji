@@ -88,7 +88,8 @@ class Task(Munch):
         Estimate completion time for a task.
 
         :returns: deferred that when fired returns a datetime object for the
-                  estimated or actual datetime.
+                  estimated, or the actual datetime, or None if we could not
+                  estimate a time for this task method.
         """
         if self.completion_ts:
             # Task is already complete. Return the exact completion time:
@@ -100,6 +101,12 @@ class Task(Munch):
         if not self.start_ts:
             raise ValueError('no start time, task in %s state' % self.state)
         package = self.package
+        if not package:
+            # TODO: estimate completion some other way besides
+            # getAverageBuildDuration. For example, we could estimate
+            # completion time for newRepo/createrepo tasks by looking back at
+            # the the past couple of tasks for this tag.
+            defer.returnValue(None)
         avg_delta = yield self.connection.getAverageBuildDuration(package)
         est_completion = self.started + avg_delta
         defer.returnValue(est_completion)
