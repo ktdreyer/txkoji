@@ -120,6 +120,18 @@ class Task(Munch):
                   estimated, or actual datetime, or None if there is no support
                   for this task method. Currently the only supported methods
                   here are "build" and "image".
+        :raises NoDescendentsError: If we expected to find descendents for this
+                  task, but there are none open. Possible explanations:
+                  * Koji has not assigned this task to a worker, because it's
+                    over capacity, or because it takes a few seconds to assign.
+                    You may see descendant tasks in FREE state here, instead of
+                    OPEN state.
+                  * The makeSRPMFromSCM descendent task for this build task is
+                    not yet complete.
+                  * The tagBuild descendent task for this build task is not yet
+                    complete.
+                  If you hit this NoDescendentsError, you may want to try again
+                  in a few minutes.
         """
         child_method = None
         if self.method == 'build':
@@ -132,11 +144,8 @@ class Task(Munch):
         subtasks = yield self.descendents(method=child_method,
                                           state=task_states.OPEN)
         if not subtasks:
-            # Maybe koji has not assigned this task to a worker (over
-            # capacity), or maybe makeSRPMFromSCM is still running.
-            # Try again in a few minutes?
-            raise ValueError('no running %s for task %d' %
-                             (child_method, self.id))
+            raise NoDescendentsError('no running %s for task %d' %
+                                     (child_method, self.id))
         # Find subtask with the most recent start time:
         build_task = subtasks[0]
         for subtask in subtasks:
@@ -257,3 +266,8 @@ class Task(Munch):
         """
         endpoint = 'taskinfo?taskID=%d' % self.id
         return posixpath.join(self.connection.weburl, endpoint)
+
+
+class NoDescendentsError(Exception):
+    """ Could not find open buildArch descendents for this task. """
+    pass
