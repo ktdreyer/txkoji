@@ -117,12 +117,17 @@ class Task(Munch):
         Estimate from the descendent (child) tasks.
 
         :returns: deferred that when fired returns a datetime object for the
-                  estimated or actual datetime.
+                  estimated, or actual datetime, or None if there is no support
+                  for this task method. Currently the only supported methods
+                  here are "build" and "image".
         """
+        child_method = None
         if self.method == 'build':
             child_method = 'buildArch'
         if self.method == 'image':
             child_method = 'createImage'
+        if child_method is None:
+            defer.returnValue(None)
         # Find the open child task and estimate that.
         subtasks = yield self.descendents(method=child_method,
                                           state=task_states.OPEN)
