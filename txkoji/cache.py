@@ -8,6 +8,12 @@ class Cache(object):
         """
         Read-through cache manager for user and tag names.
 
+        This cache will write everything into XDG_CACHE_HOME, or ~/.cache.
+
+        This class does no eviction or expiration - all the data will persist
+        in the cache forever. If you want to clear the cache, you'll need to
+        delete files manually for now.
+
         :param connection: txkoji.Connection
         :param directory: optional, directory on disk to store cache data.
         """
