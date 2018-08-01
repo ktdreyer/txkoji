@@ -42,7 +42,7 @@ class Cache(object):
 
         :param type_: str, "user" or "tag"
         :param id_: int, eg. 123456
-        :returns: str, or None
+        :returns: None
         """
         cachefile = self.filename(type_, id_)
         dirname = os.path.dirname(cachefile)
