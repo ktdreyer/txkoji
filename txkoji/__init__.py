@@ -21,6 +21,7 @@ except ImportError:
     from urlparse import urlparse, parse_qs
     import xmlrpclib as xmlrpc
 from txkoji.query_factory import KojiQueryFactory
+from txkoji.call import Call
 from txkoji.task import Task
 from txkoji.build import Build
 from txkoji.package import Package
@@ -30,21 +31,6 @@ __version__ = '0.5.0'
 
 
 PROFILES = '/etc/koji.conf.d/*.conf'
-
-
-class Call(object):
-    """
-    Callable abstract class representing a Koji RPC, eg "getTag".
-
-    :param connection: ``txkoji.Connection``
-    :param name: XML-RPC method name to call on the server, eg. "getTag".
-    """
-    def __init__(self, connection, name):
-        self.connection = connection
-        self.name = name
-
-    def __call__(self, *args, **kwargs):
-        return self.connection.call(self.name, *args, **kwargs)
 
 
 class Connection(object):
