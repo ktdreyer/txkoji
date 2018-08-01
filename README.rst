@@ -95,6 +95,20 @@ valid Kerberos ticket or SSL keypair.
         print(user)
 
 
+Caching long-lived object names
+-------------------------------
+
+Sometimes all you have is a user id number or tag id number, and you want the
+user's name or tag's name instead.
+
+txkoji includes a read-through cache for obtaining the user name or tag name.
+See ``examples/cache.py`` for an example. txkoji's cache module stores its data
+in a ``txkoji`` subdirectory of the location specified with the
+``$XDG_CACHE_HOME`` environment variable if that is set. It will fall back to
+using ``~/.cache/txkoji`` if the ``$XDG_CACHE_HOME`` environment variable is
+not set.
+
+
 Rich objects
 ------------
 

@@ -21,6 +21,7 @@ except ImportError:
     from urlparse import urlparse, parse_qs
     import xmlrpclib as xmlrpc
 from txkoji.query_factory import KojiQueryFactory
+from txkoji.cache import Cache
 from txkoji.call import Call
 from txkoji.task import Task
 from txkoji.build import Build
@@ -45,6 +46,7 @@ class Connection(object):
             raise ValueError(msg)
         self.proxy = Proxy(self.url.encode(), allowNone=True)
         self.proxy.queryFactory = KojiQueryFactory
+        self.cache = Cache(self)
         # We populate these on login:
         self.session_id = None
         self.session_key = None
