@@ -28,8 +28,7 @@ class Cache(object):
         :param id_: int, eg. 123456
         :returns: str, or None
         """
-        filename = '%s-%s-%d' % (self.connection.profile, type_, id_)
-        cachefile = os.path.join(self.directory, filename)
+        cachefile = self.filename(type_, id_)
         try:
             with open(cachefile, 'r') as f:
                 return f.read()
@@ -45,15 +44,26 @@ class Cache(object):
         :param id_: int, eg. 123456
         :returns: str, or None
         """
+        cachefile = self.filename(type_, id_)
+        dirname = os.path.dirname(cachefile)
         try:
-            os.makedirs(self.directory)
+            os.makedirs(dirname)
         except OSError as e:
             if e.errno != errno.EEXIST:
                 raise
-        filename = '%s-%s-%d' % (self.connection.profile, type_, id_)
-        cachefile = os.path.join(self.directory, filename)
         with open(cachefile, 'w') as f:
             return f.write(name)
+
+    def filename(self, type_, id_):
+        """
+        cache filename to read for this type/id.
+
+        :param type_: str, "user" or "tag"
+        :param id_: int, eg. 123456
+        :returns: str
+        """
+        profile = self.connection.profile
+        return os.path.join(self.directory, profile, type_, str(id_))
 
     @defer.inlineCallbacks
     def get_or_load_name(self, type_, id_, method):
