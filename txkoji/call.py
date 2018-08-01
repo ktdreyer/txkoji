@@ -11,4 +11,3 @@ class Call(object):
 
     def __call__(self, *args, **kwargs):
         return self.connection.call(self.name, *args, **kwargs)
-
