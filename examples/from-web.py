@@ -1,24 +1,17 @@
-from txkoji import Connection, KojiException
-from twisted.internet import defer, reactor
+from txkoji import Connection
+from twisted.internet import defer
+from twisted.internet.task import react
 
 
 @defer.inlineCallbacks
-def example():
+def example(reactor):
     url = 'https://cbs.centos.org/koji/buildinfo?buildID=21155'
     koji = Connection.connect_from_web(url)
-    try:
-        data = yield koji.from_web(url)
-        print(data)
-    except KojiException as e:
-        print(type(e))
-        print(e)
-    except Exception as e:
-        print(type(e))
-        print(e)
+    if not koji:
+        raise ValueError('url %s is not a recognizable Koji URL' % url)
+    data = yield koji.from_web(url)
+    print(data)
 
 
 if __name__ == '__main__':
-    d = example()
-    d.addCallback(lambda ign: reactor.stop())
-    d.addErrback(lambda ign: reactor.stop())
-    reactor.run()
+    react(example)

@@ -17,26 +17,23 @@ Simple Example: Fetching a user's name
 
 .. code-block:: python
 
-    from txkoji import Connection, KojiException
-    from twisted.internet import defer, reactor
+    from txkoji import Connection
+    from twisted.internet import defer
+    from twisted.internet.task import react
 
 
     @defer.inlineCallbacks
-    def example():
+    def example(reactor):
         koji = Connection('brew')
-        # fetch a user
-        try:
-            # you may pass an ID or a krb principal here
-            user = yield koji.getUser(3595)
-            # user is a Munch (dict-like) object.
-            print(user.name)
-        except KojiException as e:
-            print(e)
+        # Fetch a user.
+        # You may pass an ID or a krb principal here
+        user = yield koji.getUser(3595)
+        # user is a Munch (dict-like) object.
+        print(user.name)
 
 
     if __name__ == '__main__':
-        example().addCallback(lambda ign: reactor.stop())
-        reactor.run()
+        react(example)
 
 Connecting to a Koji Hub
 ------------------------
@@ -59,7 +56,7 @@ a given task ID and tag ID:
 .. code-block:: python
 
     @defer.inlineCallbacks
-    def example():
+    def example(reactor):
         koji = Connection('mykoji')
 
         task = yield koji.getTaskInfo(10000)
@@ -86,7 +83,7 @@ valid Kerberos ticket or SSL keypair.
 .. code-block:: python
 
     @defer.inlineCallbacks
-    def example():
+    def example(reactor):
         koji = Connection('mykoji')
 
         result = yield login()
