@@ -52,7 +52,7 @@ class Cache(object):
             if e.errno != errno.EEXIST:
                 raise
         with open(cachefile, 'w') as f:
-            return f.write(name)
+            f.write(name)
 
     def filename(self, type_, id_):
         """
