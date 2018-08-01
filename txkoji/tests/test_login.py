@@ -2,7 +2,7 @@ from munch import Munch
 import pytest
 from twisted.internet import defer
 from txkoji import Connection
-from txkoji import KojiLoginException
+from txkoji.exceptions import KojiLoginException
 from txkoji.tests.util import FakeSSLLoginResponse
 from txkoji.tests.util import FakeProxy
 
@@ -40,7 +40,7 @@ class TestLogin(object):
     @pytest.inlineCallbacks
     def test_authenticated_call(self, monkeypatch):
         monkeypatch.setattr('treq_kerberos.post', fake_post_ok)
-        monkeypatch.setattr('txkoji.Proxy', FakeProxy)
+        monkeypatch.setattr('txkoji.connection.Proxy', FakeProxy)
         koji = Connection('mykoji')
         yield koji.login()
 

@@ -15,7 +15,7 @@ class TestGetTask(object):
         # To create this fixture file:
         # cbs call getTaskInfo 291929 --kwargs="{'request': True}" \
         #   --json-output > txkoji/tests/fixtures/calls/getTaskInfo.json
-        monkeypatch.setattr('txkoji.Proxy', FakeProxy)
+        monkeypatch.setattr('txkoji.connection.Proxy', FakeProxy)
         koji = Connection('mykoji')
         d = koji.getTaskInfo(291929)
         return pytest_twisted.blockon(d)
@@ -55,7 +55,7 @@ class TestListTasks(object):
     def tasks(self, monkeypatch):
         # To create this fixture file:
         # cbs call listTasks --kwargs="{'opts': {'owner': 144, 'method': 'build', 'decode': True}}" --json-output > txkoji/tests/fixtures/calls/listTasks.json  # NOQA: E501
-        monkeypatch.setattr('txkoji.Proxy', FakeProxy)
+        monkeypatch.setattr('txkoji.connection.Proxy', FakeProxy)
         koji = Connection('mykoji')
         opts = {'owner': 144, 'method': 'build'}
         d = koji.listTasks(opts)

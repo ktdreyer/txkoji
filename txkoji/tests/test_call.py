@@ -1,6 +1,6 @@
 from munch import Munch
 import pytest
-from txkoji import Connection
+from txkoji.connection import Connection
 from txkoji.tests.util import FakeProxy
 
 
@@ -10,7 +10,7 @@ class TestCall(object):
     def test_getuser(self, monkeypatch):
         # brew call getUser kdreyer@REDHAT.COM \
         #   --json-output > txkoji/tests/fixtures/calls/getUser.json
-        monkeypatch.setattr('txkoji.Proxy', FakeProxy)
+        monkeypatch.setattr('txkoji.connection.Proxy', FakeProxy)
         koji = Connection('mykoji')
         user = yield koji.getUser('kdreyer')
         expected = Munch(id=2826,
