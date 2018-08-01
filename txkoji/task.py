@@ -234,14 +234,14 @@ class Task(Munch):
 
         :returns: An int (tag id) or string (tag name, eg "foo-build").
                   This seems to depend on the task method. For example,
-                  buildArch tasks always return a tag ID here.
+                  buildArch and tagBuild tasks always return a tag ID here.
                   If you do get an int back here, you'll have to make a
                   separate getTag RPC to get the tag's name.
         """
         if self.method in ('buildArch', 'buildMaven'):
             # Note: buildArch tag will be an int here.
             return self.params[1]
-        if self.method in ('newRepo', 'runroot'):
+        if self.method in ('newRepo', 'runroot', 'tagBuild'):
             return self.params[0]
 
     @property
