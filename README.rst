@@ -133,6 +133,9 @@ More special return values:
 * ``getAverageBuildDuration`` returns a ``datetime.timedelta`` object instead
   of a raw float, because this is more useful to do time arithmetic.
 
+* The ``task_id`` property is populated on OSBS's CG container builds (a
+  workaround for https://pagure.io/koji/issue/215).
+
 
 TODO:
 =====
