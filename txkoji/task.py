@@ -22,7 +22,7 @@ class Task(Munch):
         :returns: an arch string (eg "noarch", or "ppc64le"), or None this task
                   has no architecture associated with it.
         """
-        if self.method == 'buildArch':
+        if self.method in ('buildArch', 'createdistrepo'):
             return self.params[2]
         if self.method in ('createrepo', 'runroot'):
             return self.params[1]
@@ -242,7 +242,7 @@ class Task(Munch):
         if self.method in ('buildArch', 'buildMaven'):
             # Note: buildArch tag will be an int here.
             return self.params[1]
-        if self.method in ('newRepo', 'runroot', 'tagBuild'):
+        if self.method in ('createdistrepo', 'newRepo', 'runroot', 'tagBuild'):
             return self.params[0]
         if self.method == 'tagNotification':
             return self.params[2]
