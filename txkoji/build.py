@@ -86,3 +86,16 @@ class Build(Munch):
         avg_delta = yield self.connection.getAverageBuildDuration(self.name)
         est_completion = self.started + avg_delta
         defer.returnValue(est_completion)
+
+    @property
+    def task_id(self):
+        """
+        Hack to return a task ID for a build, including container CG builds.
+
+        We have something for this in Brewweb, but not yet for upstream Koji:
+        https://pagure.io/koji/issue/215
+        """
+        if self['task_id']:
+            return self['task_id']
+        if self.extra and 'container_koji_task_id' in self.extra:
+            return self.extra['container_koji_task_id']
