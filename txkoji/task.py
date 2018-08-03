@@ -259,6 +259,8 @@ class Task(Munch):
             return self.params[0]
         if self.method == 'image':
             return self.params[3]
+        if self.method == 'wrapperRPM':
+            return self.params[1]['name']
 
     @property
     def url(self):
