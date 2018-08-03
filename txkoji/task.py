@@ -12,6 +12,10 @@ except ImportError:
     import xmlrpclib as xmlrpc
 
 
+# A lot of the .params parsing here is conceptually similar to Koji's
+# _do_parseTaskParams in the CLI.
+
+
 class Task(Munch):
 
     @property
