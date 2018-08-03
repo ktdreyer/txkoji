@@ -260,7 +260,7 @@ class Task(Munch):
             if self.params[2]:
                 return self.params[2]['name']
         if self.method == 'createImage':
-            return self.params[0]
+            return self.params[4]['name']
         if self.method == 'image':
             return self.params[3]
         if self.method == 'wrapperRPM':
