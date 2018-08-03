@@ -26,6 +26,8 @@ class Task(Munch):
             return self.params[2]
         if self.method in ('createrepo', 'runroot'):
             return self.params[1]
+        if self.method == 'createImage':
+            return self.params[3]
 
     @property
     def arches(self):
