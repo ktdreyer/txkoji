@@ -28,6 +28,8 @@ class Task(Munch):
             return self.params[1]
         if self.method == 'createImage':
             return self.params[3]
+        if self.method == 'indirectionimage':
+            return self.params[0]['arch']
 
     @property
     def arches(self):
@@ -186,6 +188,8 @@ class Task(Munch):
             return self.params[1]['name']
         if self.method in ('createImage', 'image', 'livecd'):
             return self.params[0]
+        if self.method == 'indirectionimage':
+            return self.params[0]['name']
         # params[0] is the source URL for these tasks:
         if self.method not in ('build', 'buildArch', 'buildContainer',
                                'buildMaven', 'buildSRPMFromSCM', 'maven'):
@@ -263,6 +267,8 @@ class Task(Munch):
             return self.params[4]['name']
         if self.method in ('image', 'livecd'):
             return self.params[3]
+        if self.method == 'indirectionimage':
+            return self.params[0]['target']
         if self.method == 'wrapperRPM':
             return self.params[1]['name']
 
