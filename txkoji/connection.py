@@ -192,9 +192,12 @@ class Connection(object):
 
         :param package: ``str``, for example "ceph"
         :returns: deferred that when fired returns a datetime object for the
-                  estimated duration.
+                  estimated duration, or None if we could find no estimate for
+                  this package.
         """
         seconds = yield self.call('getAverageBuildDuration', package, **kwargs)
+        if seconds is None:
+            defer.returnValue(None)
         defer.returnValue(timedelta(seconds=seconds))
 
     @defer.inlineCallbacks
