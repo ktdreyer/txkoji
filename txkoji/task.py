@@ -22,7 +22,7 @@ class Task(Munch):
         :returns: an arch string (eg "noarch", or "ppc64le"), or None this task
                   has no architecture associated with it.
         """
-        if self.method in ('buildArch', 'createdistrepo'):
+        if self.method in ('buildArch', 'createdistrepo', 'livecd'):
             return self.params[2]
         if self.method in ('createrepo', 'runroot'):
             return self.params[1]
@@ -184,7 +184,7 @@ class Task(Munch):
         """
         if self.method == 'buildNotification':
             return self.params[1]['name']
-        if self.method in ('createImage', 'image'):
+        if self.method in ('createImage', 'image', 'livecd'):
             return self.params[0]
         # params[0] is the source URL for these tasks:
         if self.method not in ('build', 'buildArch', 'buildContainer',
@@ -261,7 +261,7 @@ class Task(Munch):
                 return self.params[2]['name']
         if self.method == 'createImage':
             return self.params[4]['name']
-        if self.method == 'image':
+        if self.method in ('image', 'livecd'):
             return self.params[3]
         if self.method == 'wrapperRPM':
             return self.params[1]['name']
