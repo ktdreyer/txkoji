@@ -50,6 +50,24 @@ class Task(Munch):
         return []
 
     @property
+    def build_id(self):
+        """
+        Find a build ID for this task.
+
+        Pass this build ID into connection.getBuild() to get the Build class
+        for this task.
+
+        This only works for the tagBuild tasks. Alternatively, you can also
+        locate the builds for other types of tasks using the listBuilds RPC
+        with the taskID kwarg, like listBuilds(taskID=...)
+
+        :returns: a build ID int, or None if no build is associated with this
+                  task.
+        """
+        if self.method == 'tagBuild':
+            return self.params[1]
+
+    @property
     def completed(self):
         """
         Return a parsed completion datetime for a task.
