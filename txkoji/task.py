@@ -108,6 +108,8 @@ class Task(Munch):
             # the the past couple of tasks for this tag.
             defer.returnValue(None)
         avg_delta = yield self.connection.getAverageBuildDuration(package)
+        if avg_delta is None:
+            defer.returnValue(None)
         est_completion = self.started + avg_delta
         defer.returnValue(est_completion)
 
