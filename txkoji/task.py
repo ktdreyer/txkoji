@@ -269,7 +269,7 @@ class Task(Munch):
                   If you do get an int back here, you'll have to make a
                   separate getTag RPC to get the tag's name.
         """
-        if self.method in ('buildArch', 'buildMaven'):
+        if self.method == 'buildArch':
             # Note: buildArch tag will be an int here.
             return self.params[1]
         if self.method in ('createdistrepo', 'distRepo', 'newRepo', 'runroot',
@@ -277,6 +277,8 @@ class Task(Munch):
             return self.params[0]
         if self.method == 'tagNotification':
             return self.params[2]
+        if self.method == 'buildMaven':
+            return self.params[1]['name']
 
     @property
     def target(self):
