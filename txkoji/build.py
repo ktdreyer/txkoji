@@ -87,6 +87,32 @@ class Build(Munch):
         est_completion = self.started + avg_delta
         defer.returnValue(est_completion)
 
+    def tags(self):
+        """
+        Find the tags for this build.
+
+        Convenience wrapper around the listTags RPC.
+
+        :returns: deferred that when fired returns a (possibly empty) list of
+                  Munch (dict-like) objects representing each tag for this
+                  build.
+        """
+        return self.connection.listTags(self.id)
+
+    def task(self):
+        """
+        Find the task for this build.
+
+        Wraps the getTaskInfo RPC.
+
+        :returns: deferred that when fired returns the Task object, or None if
+                  we could not determine the task for this build.
+        """
+        # If we have no .task_id, this is a no-op to return None.
+        if not self.task_id:
+            return defer.succeed(None)
+        return self.connection.getTaskInfo(self.task_id)
+
     @property
     def task_id(self):
         """
