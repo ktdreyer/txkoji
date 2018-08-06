@@ -99,6 +99,21 @@ class Build(Munch):
         """
         return self.connection.listTags(self.id)
 
+    @defer.inlineCallbacks
+    def target(self):
+        """
+        Find the target name for this build.
+
+        :returns: deferred that when fired returns the build task's target
+                  name. If we could not determine the build task, or the task's
+                  target, return None.
+        """
+        task = yield self.task()
+        if not task:
+            yield defer.succeed(None)
+            defer.returnValue(None)
+        defer.returnValue(task.target)
+
     def task(self):
         """
         Find the task for this build.
