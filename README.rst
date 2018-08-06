@@ -136,6 +136,13 @@ More special return values:
 * The ``task_id`` property is populated on OSBS's CG container builds (a
   workaround for https://pagure.io/koji/issue/215).
 
+Message Parsing
+---------------
+
+Koji's messagebus plugin emits messages to an AMQP broker when certain events
+happen. The ``txkoji.messages`` module has support for parsing these messages
+into the relevant txkoji ``Task`` or ``Build`` classes.
+
 
 TODO:
 =====
