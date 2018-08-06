@@ -282,7 +282,7 @@ class Task(Munch):
 
     @property
     def target(self):
-        if self.method in ('build', 'buildContainer', 'maven'):
+        if self.method in ('build', 'buildContainer', 'chainmaven', 'maven'):
             return self.params[1]
         if self.method == 'buildNotification':
             if self.params[2]:
