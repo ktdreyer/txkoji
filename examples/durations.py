@@ -1,7 +1,6 @@
 from txkoji import Connection
 from twisted.internet import defer
 from twisted.internet.task import react
-from pprint import pprint
 
 
 @defer.inlineCallbacks
