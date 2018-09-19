@@ -117,6 +117,8 @@ class Connection(object):
         # Known Kojiweb endpoints:
         endpoints = {
             'buildinfo': ('buildID', self.getBuild),
+            'channelinfo': ('channelID', self.getChannel),
+            'hostinfo': ('hostID', self.getHost),
             'packageinfo': ('packageID', self.getPackage),
             'taskinfo': ('taskID', self.getTaskInfo),
             'taginfo': ('tagID', self.getTag),
