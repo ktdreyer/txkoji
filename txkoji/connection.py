@@ -78,6 +78,8 @@ class Connection(object):
         For example, if a user pastes a kojiweb URL into chat, we want to
         discover the corresponding Koji instance hub automatically.
 
+        See also from_web().
+
         :param url: ``str``, for example
                     "http://cbs.centos.org/koji/buildinfo?buildID=21155"
         :returns: A "Connection" instance
