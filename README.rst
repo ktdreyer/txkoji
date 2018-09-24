@@ -155,6 +155,10 @@ TODO:
   ``DeferredLock`` to ensure we only have one auth'd RPC in flight at a time.
   It's not really clear to me if we can actually hit a callnum error here. More
   integration testing needed for this.
+* Ensure that Brew's "build time" equals the longest "buildArch" time for a
+  task, and not something else, like the buildSRPMFromSCM time, nor even the
+  overall build task's time. This has implications for estimating scratch
+  builds. (comparing our tasks' times to getAverageBuildDuration)
 
 Packages that use this package
 ==============================
