@@ -1,6 +1,7 @@
 from datetime import timedelta
 from glob import glob
 import os
+import re
 from munch import munchify
 import treq
 import treq_kerberos
@@ -84,6 +85,10 @@ class Connection(object):
                     "http://cbs.centos.org/koji/buildinfo?buildID=21155"
         :returns: A "Connection" instance
         """
+        # Treat any input with whitespace as invalid:
+        if re.search('\s', url):
+            return
+        url = url.split(' ', 1)[0]
         for path in glob(PROFILES):
             cfg = SafeConfigParser()
             cfg.read(path)
@@ -91,10 +96,9 @@ class Connection(object):
                 if not cfg.has_option(profile, 'weburl'):
                     continue
                 weburl = cfg.get(profile, 'weburl')
-                if weburl in url:
+                if url.startswith(weburl):
                     return klass(profile)
 
-    @defer.inlineCallbacks
     def from_web(self, url):
         """
         Reverse-engineer a kojiweb URL into an equivalent API response.
@@ -109,11 +113,13 @@ class Connection(object):
                   with data about this resource, or None if we could not parse
                   the url.
         """
+        # Treat any input with whitespace as invalid:
+        if re.search('\s', url):
+            return defer.succeed(None)
         o = urlparse(url)
         endpoint = os.path.basename(o.path)
         if o.query:
             query = parse_qs(o.query)
-        result = None
         # Known Kojiweb endpoints:
         endpoints = {
             'buildinfo': ('buildID', self.getBuild),
@@ -127,11 +133,14 @@ class Connection(object):
         }
         try:
             (param, method) = endpoints[endpoint]
-            id_ = int(query[param][0])
-            result = yield method(id_)
         except KeyError:
-            pass
-        defer.returnValue(result)
+            return defer.succeed(None)
+        try:
+            id_str = query[param][0]
+            id_ = int(id_str)
+        except (KeyError, ValueError):
+            return defer.succeed(None)
+        return method(id_)
 
     def call(self, method, *args, **kwargs):
         """
