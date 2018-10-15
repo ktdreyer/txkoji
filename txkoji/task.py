@@ -135,6 +135,8 @@ class Task(Munch):
             defer.returnValue(None)
         avg_delta = yield self.connection.getAverageBuildDuration(package)
         if avg_delta is None:
+            # For example, getAverageBuildDuration does not work for
+            # content-generator builds. See https://pagure.io/koji/issue/1128
             defer.returnValue(None)
         est_completion = self.started + avg_delta
         defer.returnValue(est_completion)
