@@ -87,6 +87,21 @@ class Build(Munch):
         est_completion = self.started + avg_delta
         defer.returnValue(est_completion)
 
+    @property
+    def gitbuildhash(self):
+        """
+        Return the dist-git sha1 from the Git source URL (if available).
+
+        Similar to rpkg's "gitbuildhash".
+
+        :returns: The Git commit sha1 (40 char block of text) at the end of
+                  this build's source URL. If this build did not have a source
+                  URL, returns None.
+        """
+        if not self.source or '#' not in self.source:
+            return None
+        return self.source.rsplit('#', 1)[-1]
+
     def tags(self):
         """
         Find the tags for this build.

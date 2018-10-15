@@ -35,6 +35,10 @@ class TestGetBuild(object):
         expected = 'https://koji.example.com/koji/buildinfo?buildID=24284'
         assert build.url == expected
 
+    def test_gitbuildhash(self, build):
+        # TODO: test with a build fixture where we have a real source URL
+        assert build.gitbuildhash is None
+
     @pytest.inlineCallbacks
     def test_estimate_completion(self, build):
         est_completion = yield build.estimate_completion()
