@@ -5,6 +5,8 @@ from txkoji import build_states
 from twisted.internet import defer
 from twisted.internet.task import react
 
+# Estimate a buildContainer task's completion time.
+
 
 @defer.inlineCallbacks
 def example(reactor):
