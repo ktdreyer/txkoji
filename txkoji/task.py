@@ -230,7 +230,9 @@ class Task(Munch):
         elif o.scheme:
             package = os.path.basename(o.path)
             if package.endswith('.git'):
-                return package[:-4]
+                package = package[:-4]
+            if self.method == 'buildContainer':
+                package += '-container'
             return package
         raise ValueError('could not parse source "%s"' % source)
 

@@ -49,8 +49,6 @@ def estimate_open(koji, task):
     state = build_states.COMPLETE
     opts = {'limit': 1, 'order': '-completion_time'}
     package = task.package
-    if not package.endswith('-container'):
-        package += '-container'
     print('Looking for previous %s builds' % package)
     builds = yield koji.listBuilds(package, state=state, queryOpts=opts)
     build = builds[0]
