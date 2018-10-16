@@ -49,6 +49,15 @@ def estimate_free(koji, task):
 @defer.inlineCallbacks
 def estimate_open(koji, task):
     state = build_states.COMPLETE
+    # TODO: take branches into account when estimating a task.
+    # - Look at this build target, determine the destination tag, and then list
+    #   the 10 most recent builds that are tagged into that destination.
+    #   Average the duration for that list of builds.
+    # - If we could not find anything tagged into that destination yet, fall
+    #   back to simply searching the 10 most recent build overall and averaging
+    #   those build's durations.
+    # - If there is no recent build (it's an entirely new package), return
+    #   None.
     opts = {'limit': 1, 'order': '-completion_time'}
     package = task.package
     print('Looking for previous %s builds' % package)
