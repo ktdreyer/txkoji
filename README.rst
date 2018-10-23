@@ -159,6 +159,7 @@ TODO:
   task, and not something else, like the buildSRPMFromSCM time, nor even the
   overall build task's time. This has implications for estimating scratch
   builds. (comparing our tasks' times to getAverageBuildDuration)
+* Multi-call support
 
 Packages that use this package
 ==============================
