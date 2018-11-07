@@ -86,7 +86,7 @@ class Connection(object):
         :returns: A "Connection" instance
         """
         # Treat any input with whitespace as invalid:
-        if re.search('\s', url):
+        if re.search(r'\s', url):
             return
         url = url.split(' ', 1)[0]
         for path in glob(PROFILES):
@@ -114,7 +114,7 @@ class Connection(object):
                   the url.
         """
         # Treat any input with whitespace as invalid:
-        if re.search('\s', url):
+        if re.search(r'\s', url):
             return defer.succeed(None)
         o = urlparse(url)
         endpoint = os.path.basename(o.path)
