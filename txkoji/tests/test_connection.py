@@ -12,8 +12,9 @@ def test_basic():
 
 def test_missing_profile(monkeypatch):
     monkeypatch.setattr('txkoji.connection.PROFILES', ['/noexist'])
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError) as e:
         Connection('mykoji')
+    assert "no server configured at ['/noexist'] for mykoji" in str(e)
 
 
 def bad_web_url_matrix():
