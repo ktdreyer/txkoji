@@ -42,8 +42,9 @@ To connect to a Koji hub, create a new ``txkoji.Connection`` instance.
 
 You must pass a string to the constructor. This string is a profile name. For
 example, if you call ``Connector('mykoji')``, then txkoji will search
-``/etc/koji.conf.d/*.conf`` for the ``[mykoji]`` config section. This matches
-what the regular Koji client code does.
+``~/.koji/config.d/*.conf`` and ``/etc/koji.conf.d/*.conf`` for the
+``[mykoji]`` config section. This matches what the regular Koji client code
+does.
 
 Making XML-RPC calls
 --------------------

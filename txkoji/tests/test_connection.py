@@ -11,7 +11,7 @@ def test_basic():
 
 
 def test_missing_profile(monkeypatch):
-    monkeypatch.setattr('txkoji.connection.PROFILES', '/noexist')
+    monkeypatch.setattr('txkoji.connection.PROFILES', ['/noexist'])
     with pytest.raises(ValueError):
         Connection('mykoji')
 

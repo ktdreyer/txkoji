@@ -33,7 +33,23 @@ from txkoji.exceptions import KojiException, KojiLoginException
 __version__ = '0.5.0'
 
 
-PROFILES = '/etc/koji.conf.d/*.conf'
+PROFILES = ('~/.koji/config.d/*.conf', '/etc/koji.conf.d/*.conf')
+
+
+def profiles():
+    """
+    List of all the connection profile files, ordered by preference.
+
+    :returns: list of all Koji client config files. Example:
+              ['/home/kdreyer/.koji/config.d/kojidev.conf',
+               '/etc/koji.conf.d/stg.conf',
+               '/etc/koji.conf.d/fedora.conf']
+    """
+    paths = []
+    for pattern in PROFILES:
+        pattern = os.path.expanduser(pattern)
+        paths += glob(pattern)
+    return paths
 
 
 class Connection(object):
@@ -59,7 +75,7 @@ class Connection(object):
         :param setting: ``str`` like "server" (for kojihub) or "weburl"
         :returns: ``str``, value for this setting
         """
-        for path in glob(PROFILES):
+        for path in profiles():
             cfg = SafeConfigParser()
             cfg.read(path)
             if profile not in cfg.sections():
@@ -89,7 +105,7 @@ class Connection(object):
         if re.search(r'\s', url):
             return
         url = url.split(' ', 1)[0]
-        for path in glob(PROFILES):
+        for path in profiles():
             cfg = SafeConfigParser()
             cfg.read(path)
             for profile in cfg.sections():
