@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 from txkoji import Connection
 from txkoji import task_states
 from txkoji import build_states
@@ -48,7 +48,6 @@ def estimate_free(koji, task):
 
 @defer.inlineCallbacks
 def estimate_open(koji, task):
-    state = build_states.COMPLETE
     # TODO: take branches into account when estimating a task.
     # - Look at this build target, determine the destination tag, and then list
     #   the 10 most recent builds that are tagged into that destination.
@@ -58,19 +57,31 @@ def estimate_open(koji, task):
     #   those build's durations.
     # - If there is no recent build (it's an entirely new package), return
     #   None.
-    opts = {'limit': 1, 'order': '-completion_time'}
-    package = task.package
-    print('Looking for previous %s builds' % package)
-    builds = yield koji.listBuilds(package, state=state, queryOpts=opts)
-    build = builds[0]
-    print('The previous %s build took %s' % (package, build.duration))
-    est_complete = task.started + build.duration
+    duration = yield average_build_duration(koji, task.package)
+    est_complete = task.started + duration
     remaining = est_complete - datetime.utcnow()
     description = describe_delta(remaining)
     if remaining.total_seconds() > 0:
         print('this task should be complete in %s' % description)
     else:
         print('this task exceeds the last build by %s' % description)
+
+
+@defer.inlineCallbacks
+def average_build_duration(koji, package, limit=5):
+    """
+    Find the average duration time for the last couple of builds.
+
+    :returns: deferred that when fired returns a datetime.timedelta object
+    """
+    state = build_states.COMPLETE
+    opts = {'limit': 5, 'order': '-completion_time'}
+    print('Looking for previous %s builds' % package)
+    builds = yield koji.listBuilds(package, state=state, queryOpts=opts)
+    durations = [build.duration for build in builds]
+    average = sum(durations, timedelta()) / limit
+    print('average duration is %s' % average)
+    defer.returnValue(average)
 
 
 def list_free_tasks(koji, channel_id):
