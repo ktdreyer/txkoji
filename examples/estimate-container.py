@@ -44,6 +44,31 @@ def estimate_free(koji, task):
     # then estimate based on that.
     capacity = yield total_capacity(koji, channel_id)
     print('This channel can handle %d tasks at a time' % capacity)
+    # From this point on, we assume that all the OPEN tasks are going to be
+    # faster than the fastest FREE tasks that are still in the queue. If this
+    # is not the case, then our estimate will be longer than reality.
+    # Estimate the duration of each open task.
+    open_tasks = yield list_tasks(koji, channel_id, 'OPEN')
+    open_estimates = []
+    utcnow = datetime.utcnow()
+    for open_task in open_tasks:
+        if open_task.method != 'buildContainer':
+            raise RuntimeError('%s is not buildContainer' % open_task.url)
+        duration = yield average_build_duration(koji, open_task.package)
+        est_complete = open_task.started + duration
+        remaining = est_complete - utcnow
+        open_estimates.append(remaining)
+    # Sort by estimated completion:
+    sorted_estimates = sorted(open_estimates)
+    # Find the "ahead" number (eg. "10") shortest tasks.
+    ahead_estimates = sorted_estimates[:ahead]
+    # The longest of that number is how long we have to wait to get to OPEN.
+    longest = ahead_estimates[-1]
+    print('The longest OPEN task until we get to OPEN: %s' % longest)
+    avg_duration = yield average_build_duration(koji, task.package)
+    remaining = longest + avg_duration
+    description = describe_delta(remaining)
+    print('Our task should be complete in %s' % description)
 
 
 @defer.inlineCallbacks
