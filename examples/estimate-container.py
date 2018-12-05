@@ -28,7 +28,7 @@ def example(reactor):
 def estimate_free(koji, task):
     # Look up how many tasks are ahead of this one.
     channel_id = task.channel_id
-    free_tasks = yield list_free_tasks(koji, channel_id)
+    free_tasks = yield list_tasks(koji, channel_id, 'FREE')
     ahead = []
     for free_task in free_tasks:
         if task.id > free_task.id:
@@ -84,15 +84,16 @@ def average_build_duration(koji, package, limit=5):
     defer.returnValue(average)
 
 
-def list_free_tasks(koji, channel_id):
+def list_tasks(koji, channel_id, state_name):
     """
-    List all the not-yet-started tasks for this channel
+    List all the tasks for this channel
 
+    :param: state_name: eg "FREE"
     :returns: deferred that when fired returns a list of tasks
     """
     # state_names = ['FREE', 'ASSIGNED']
     # states = [getattr(task_states, name) for name in state_names]
-    state = getattr(task_states, 'FREE')
+    state = getattr(task_states, state_name)
     opts = {'state': [state], 'channelID': channel_id}
     qopts = {'order': 'priority,create_time'}
     return koji.listTasks(opts, qopts)
