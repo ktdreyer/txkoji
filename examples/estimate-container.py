@@ -104,8 +104,7 @@ def total_capacity(koji, channel_id):
     Look up the current capacity for this channel.
     """
     total_capacity = 0
-    hosts = yield koji.listHosts(channelID=channel_id,
-                                 enabled=True, ready=True)
+    hosts = yield koji.listHosts(channelID=channel_id, enabled=True)
     for host in hosts:
         total_capacity += host.capacity
     defer.returnValue(total_capacity)
