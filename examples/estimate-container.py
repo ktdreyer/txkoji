@@ -94,7 +94,7 @@ def list_tasks(koji, channel_id, state_name):
     # state_names = ['FREE', 'ASSIGNED']
     # states = [getattr(task_states, name) for name in state_names]
     state = getattr(task_states, state_name)
-    opts = {'state': [state], 'channelID': channel_id}
+    opts = {'state': [state], 'channel_id': channel_id}
     qopts = {'order': 'priority,create_time'}
     return koji.listTasks(opts, qopts)
 
