@@ -1,4 +1,5 @@
 from datetime import datetime, timedelta
+import sys
 from txkoji import Connection
 from txkoji import task_states
 from txkoji import build_states
@@ -10,10 +11,11 @@ from twisted.internet.task import react
 
 @defer.inlineCallbacks
 def example(reactor):
+    task_id = sys.argv[1]
     koji = Connection('brew')
 
     # Look up the task information:
-    task = yield koji.getTaskInfo(19397694)
+    task = yield koji.getTaskInfo(task_id)
     assert task.method == 'buildContainer'
 
     if task.state == task_states.FREE:
