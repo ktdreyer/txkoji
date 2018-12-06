@@ -13,7 +13,7 @@ def example(reactor):
     koji = Connection('brew')
 
     # Look up the task information:
-    task = yield koji.getTaskInfo(18792505)
+    task = yield koji.getTaskInfo(19397694)
     assert task.method == 'buildContainer'
 
     if task.state == task_states.FREE:
@@ -49,12 +49,17 @@ def estimate_free(koji, task):
     # is not the case, then our estimate will be longer than reality.
     # Estimate the duration of each open task.
     open_tasks = yield list_tasks(koji, channel_id, 'OPEN')
+    avg_durations = {}
     open_estimates = []
     utcnow = datetime.utcnow()
     for open_task in open_tasks:
         if open_task.method != 'buildContainer':
             raise RuntimeError('%s is not buildContainer' % open_task.url)
-        duration = yield average_build_duration(koji, open_task.package)
+        package = open_task.package
+        duration = avg_durations.get(package)
+        if not duration:
+            duration = yield average_build_duration(koji, package)
+            avg_durations[package] = duration
         est_complete = open_task.started + duration
         remaining = est_complete - utcnow
         open_estimates.append(remaining)
