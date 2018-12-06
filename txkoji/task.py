@@ -80,6 +80,15 @@ class Task(Munch):
         return datetime.utcfromtimestamp(self.completion_ts)
 
     @property
+    def created(self):
+        """
+        Return a parsed created datetime for a task.
+
+        :returns: a datetime object for the time this task was created
+        """
+        return datetime.utcfromtimestamp(self.create_ts)
+
+    @property
     def started(self):
         """
         Return a parsed started datetime for a task.
