@@ -1,4 +1,5 @@
 from datetime import datetime, timedelta
+from pprint import pprint
 import sys
 from txkoji import Connection
 from txkoji import task_states
@@ -51,28 +52,43 @@ def estimate_free(koji, task):
     # is not the case, then our estimate will be longer than reality.
     # Estimate the duration of each open task.
     open_tasks = yield list_tasks(koji, channel_id, 'OPEN')
-    avg_durations = {}
-    open_estimates = []
-    utcnow = datetime.utcnow()
+    packages = set()
+    # Calculate the average durations for all OPEN "packages".
     for open_task in open_tasks:
         # Sanity-check while we're here:
         if open_task.method != 'buildContainer':
             raise RuntimeError('%s is not buildContainer' % open_task.url)
-        package = open_task.package
-        duration = avg_durations.get(package)
-        if not duration:
-            duration = yield average_build_duration(koji, package)
-            avg_durations[package] = duration
+        packages.add(open_task.package)
+    print('checking avg build duration for %i packages:' % len(packages))
+    packages = list(packages)
+    deferreds = [average_build_duration(koji, package) for package in packages]
+    results = yield defer.gatherResults(deferreds, consumeErrors=True)
+    avg_durations = dict(zip(packages, results))
+    # pprint(avg_durations)
+    # Determine estimates for all our tasks.
+    open_estimates = []
+    utcnow = datetime.utcnow()
+    for open_task in open_tasks:
+        duration = avg_durations[open_task.package]
         est_complete = open_task.started + duration
         remaining = est_complete - utcnow
-        open_estimates.append(remaining)
+        if remaining.total_seconds() < 0:
+            description = describe_delta(remaining)
+            package = open_task.package
+            print('warning: %d %s exceeds est by %s' %
+                  (open_task.id, package, description))
+        else:
+            open_estimates.append(remaining)
     # Sort by estimated completion:
     sorted_estimates = sorted(open_estimates)
     # Find the "ahead" number (eg. "10") shortest tasks.
     ahead_estimates = sorted_estimates[:len(ahead)]
     # The longest of that number is how long we have to wait to get to OPEN.
-    longest = ahead_estimates[-1]
-    print('The longest OPEN task until we get to OPEN: %s' % longest)
+    if ahead_estimates:
+        longest = ahead_estimates[-1]
+    else:
+        longest = timedelta(0)
+    print('The longest OPEN task estimate until we get to OPEN: %s' % longest)
     avg_duration = yield average_build_duration(koji, task.package)
     remaining = longest + avg_duration
     description = describe_delta(remaining)
