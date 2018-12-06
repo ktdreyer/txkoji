@@ -112,7 +112,7 @@ def average_build_duration(koji, package, limit=5):
     builds = yield koji.listBuilds(package, state=state, queryOpts=opts)
     durations = [build.duration for build in builds]
     average = sum(durations, timedelta()) / limit
-    print('average duration is %s' % average)
+    print('average duration for %s is %s' % (package, average))
     defer.returnValue(average)
 
 
