@@ -66,7 +66,7 @@ def estimate_free(koji, task):
     # Sort by estimated completion:
     sorted_estimates = sorted(open_estimates)
     # Find the "ahead" number (eg. "10") shortest tasks.
-    ahead_estimates = sorted_estimates[:ahead]
+    ahead_estimates = sorted_estimates[:len(ahead)]
     # The longest of that number is how long we have to wait to get to OPEN.
     longest = ahead_estimates[-1]
     print('The longest OPEN task until we get to OPEN: %s' % longest)
