@@ -55,6 +55,7 @@ def estimate_free(koji, task):
     open_estimates = []
     utcnow = datetime.utcnow()
     for open_task in open_tasks:
+        # Sanity-check while we're here:
         if open_task.method != 'buildContainer':
             raise RuntimeError('%s is not buildContainer' % open_task.url)
         package = open_task.package
