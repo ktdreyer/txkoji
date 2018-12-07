@@ -29,6 +29,33 @@ class TestGetChannel(object):
     def test_connection(self, channel):
         assert isinstance(channel.connection, Connection)
 
+    @pytest.inlineCallbacks
+    def test_hosts(self, channel):
+        hosts = yield channel.hosts(enabled=True)
+        expected = [
+            {'arches': 'x86_64 i386',
+             'capacity': 16.0,
+             'comment': None,
+             'description': None,
+             'enabled': True,
+             'id': 1,
+             'name': 'x86_64-0.centos.org',
+             'ready': True,
+             'task_load': 0.0,
+             'user_id': 7},
+            {'arches': 'x86_64 i386',
+             'capacity': 30.0,
+             'comment': None,
+             'description': None,
+             'enabled': True,
+             'id': 3,
+             'name': 'x86_64-2.cbs.centos.org',
+             'ready': True,
+             'task_load': 0.0,
+             'user_id': 49}
+         ]
+        assert hosts == expected
+
 
 class TestListChannels(object):
 

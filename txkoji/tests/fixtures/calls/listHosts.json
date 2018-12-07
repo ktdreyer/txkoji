@@ -1,0 +1,26 @@
+[
+  {
+    "comment": null,
+    "capacity": 16.0,
+    "name": "x86_64-0.centos.org",
+    "enabled": true,
+    "arches": "x86_64 i386",
+    "task_load": 0.0,
+    "ready": true,
+    "user_id": 7,
+    "id": 1,
+    "description": null
+  },
+  {
+    "comment": null,
+    "capacity": 30.0,
+    "name": "x86_64-2.cbs.centos.org",
+    "enabled": true,
+    "arches": "x86_64 i386",
+    "task_load": 0.0,
+    "ready": true,
+    "user_id": 49,
+    "id": 3,
+    "description": null
+  }
+]
