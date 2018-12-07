@@ -1,0 +1,30 @@
+[
+  {
+    "id": 1,
+    "name": "default"
+  },
+  {
+    "id": 2,
+    "name": "createrepo"
+  },
+  {
+    "id": 3,
+    "name": "maven"
+  },
+  {
+    "id": 4,
+    "name": "livecd"
+  },
+  {
+    "id": 5,
+    "name": "appliance"
+  },
+  {
+    "id": 6,
+    "name": "vm"
+  },
+  {
+    "id": 7,
+    "name": "image"
+  }
+]
