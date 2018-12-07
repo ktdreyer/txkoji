@@ -198,11 +198,8 @@ class Task(Munch):
         """
         # Query the information we need for this task's channel and package.
         # (Maybe move some of this code to a Channel class?)
-        hosts_deferred = self.connection.listHosts(channelID=self.channel_id,
-                                                   enabled=True)
-        opts = {'state': [task_states.OPEN], 'channel_id': self.channel_id}
-        qopts = {'order': 'priority,create_time'}
-        open_tasks_deferred = self.connection.listTasks(opts, qopts)
+        hosts_deferred = self.channel.hosts(enabled=True)
+        open_tasks_deferred = self.channel.tasks(state=[task_states.OPEN])
         avg_delta_deferred = self.estimate_duration()
         deferreds = [hosts_deferred, open_tasks_deferred, avg_delta_deferred]
         results = yield defer.gatherResults(deferreds, consumeErrors=True)
