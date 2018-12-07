@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 import os.path
 import posixpath
 from munch import Munch, unmunchify
@@ -11,6 +11,10 @@ except ImportError:
     from urlparse import urlparse
     import xmlrpclib as xmlrpc
 
+
+# The default kojid sleeptime upstream is 15. The RH builders have this dialed
+# up to 45. We'll pick the higher number for estimation purposes.
+SLEEPTIME = timedelta(seconds=45)
 
 # A lot of the .params parsing here is conceptually similar to Koji's
 # _do_parseTaskParams in the CLI.
@@ -133,8 +137,9 @@ class Task(Munch):
         if self.method == 'build' or self.method == 'image':
             subtask_completion = yield self.estimate_descendents()
             defer.returnValue(subtask_completion)
-        if not self.start_ts:
-            raise ValueError('no start time, task in %s state' % self.state)
+        if self.state == task_states.FREE:
+            est_completion = yield self._estimate_free()
+            defer.returnValue(est_completion)
         avg_delta = yield self.estimate_duration()
         if avg_delta is None:
             defer.returnValue(None)
@@ -161,9 +166,47 @@ class Task(Munch):
             # completion time for newRepo/createrepo tasks by looking back at
             # the the past couple of tasks for this tag.
             return defer.succeed(None)
-        # Note, getAverageBuildDuration does not work for
-        # content-generator builds. See https://pagure.io/koji/issue/1128
         return self.connection.getAverageBuildDuration(self.package)
+
+    @defer.inlineCallbacks
+    def _estimate_free(self):
+        """
+        Estimate completion time for a free task.
+
+        :returns: deferred that when fired returns a datetime object for the
+                  estimated, or the actual datetime, or None if we could not
+                  estimate a time for this task method.
+        """
+        # Query the information we need for this task's channel and package.
+        # (Maybe move some of this code to a Channel class?)
+        hosts_deferred = self.connection.listHosts(channelID=self.channel_id,
+                                                   enabled=True)
+        opts = {'state': [task_states.OPEN], 'channel_id': self.channel_id}
+        qopts = {'order': 'priority,create_time'}
+        open_tasks_deferred = self.connection.listTasks(opts, qopts)
+        avg_delta_deferred = self.estimate_duration()
+        deferreds = [hosts_deferred, open_tasks_deferred, avg_delta_deferred]
+        results = yield defer.gatherResults(deferreds, consumeErrors=True)
+        hosts, open_tasks, avg_delta = results
+        # Ensure this task's channel has spare capacity for this task.
+        total_capacity = 0
+        for host in hosts:
+            total_capacity += host.capacity
+        if len(open_tasks) >= total_capacity:
+            # TODO: Evaluate all tasks in the channel and
+            # determine when enough OPEN tasks will complete so that we can
+            # get to OPEN.
+            raise NotImplementedError('channel %d is at capacity' %
+                                      self.channel_id)
+        # A builder will pick up this task and start it within SLEEPTIME.
+        # start_time is the maximum amount of time we expect to wait here.
+        start_time = self.created + SLEEPTIME
+        if avg_delta is None:
+            # For example, getAverageBuildDuration does not work for
+            # content-generator builds. See https://pagure.io/koji/issue/1128
+            defer.returnValue(None)
+        est_completion = start_time + avg_delta
+        defer.returnValue(est_completion)
 
     @defer.inlineCallbacks
     def estimate_descendents(self):
