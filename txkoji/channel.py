@@ -1,4 +1,5 @@
 from munch import Munch
+from twisted.internet import defer
 
 
 class Channel(Munch):
@@ -27,3 +28,24 @@ class Channel(Munch):
         opts['channel_id'] = self.id
         qopts = {'order': 'priority,create_time'}
         return self.connection.listTasks(opts, qopts)
+
+    @defer.inlineCallbacks
+    def total_capacity(self):
+        """
+        Find the total task capacity available for this channel.
+
+        Query all the enabled hosts for this channel and sum up all the
+        capacities.
+
+        Each task has a "weight". Each task will be in "FREE" state until
+        there is enough capacity for the task's "weight" on a host.
+
+        :returns: deferred that when fired returns a float value: the total
+                  task weight that this channel can have open simultaneously.
+        """
+        # Ensure this task's channel has spare capacity for this task.
+        total_capacity = 0
+        hosts = yield self.hosts(enabled=True)
+        for host in hosts:
+            total_capacity += host.capacity
+        defer.returnValue(total_capacity)

@@ -56,6 +56,12 @@ class TestGetChannel(object):
          ]
         assert hosts == expected
 
+    @pytest.inlineCallbacks
+    def test_total_capacity(self, channel):
+        total_capacity = yield channel.total_capacity()
+        expected = 46.0
+        assert total_capacity == expected
+
 
 class TestListChannels(object):
 
