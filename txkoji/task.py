@@ -5,6 +5,7 @@ from munch import Munch, unmunchify
 from twisted.internet import defer
 from txkoji import task_states
 from txkoji.channel import Channel
+from txkoji.estimates import average_build_duration
 try:
     from urllib.parse import urlparse
     import xmlrpc
@@ -185,7 +186,7 @@ class Task(Munch):
             # completion time for newRepo/createrepo tasks by looking back at
             # the the past couple of tasks for this tag.
             return defer.succeed(None)
-        return self.connection.getAverageBuildDuration(self.package)
+        return average_build_duration(self.connection, self.package)
 
     @defer.inlineCallbacks
     def _estimate_free(self):
@@ -217,8 +218,6 @@ class Task(Munch):
         # start_time is the maximum amount of time we expect to wait here.
         start_time = self.created + SLEEPTIME
         if avg_delta is None:
-            # For example, getAverageBuildDuration does not work for
-            # content-generator builds. See https://pagure.io/koji/issue/1128
             defer.returnValue(None)
         est_completion = start_time + avg_delta
         defer.returnValue(est_completion)

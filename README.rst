@@ -95,6 +95,16 @@ valid Kerberos ticket or SSL keypair.
         user = yield koji.getLoggedInUser()
         print(user)
 
+Estimating build durations
+--------------------------
+
+The ``txkoji.estimates`` module provides methods for estimating build times.
+The ``average_build_duration()`` method calls Koji's
+``getAverageBuildDuration`` RPC and gives you a ``datetime.timedelta`` for a
+package. For container packages, we do something similar client-side with the
+``average_last_builds()`` method, averaging the last five builds' durations.
+
+
 
 Caching long-lived object names
 -------------------------------
