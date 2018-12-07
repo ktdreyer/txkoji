@@ -24,6 +24,7 @@ except ImportError:
 from txkoji.query_factory import KojiQueryFactory
 from txkoji.cache import Cache
 from txkoji.call import Call
+from txkoji.channel import Channel
 from txkoji.task import Task
 from txkoji.build import Build
 from txkoji.package import Package
@@ -248,6 +249,24 @@ class Connection(object):
         defer.returnValue(build)
 
     @defer.inlineCallbacks
+    def getChannel(self, channel_id, **kwargs):
+        """
+        Load all information about a channel and return a custom Channel class.
+
+        Calls "getChannel" XML-RPC.
+
+        :param channel_id: ``int``, for example 12345, or ``str`` for name.
+        :returns: deferred that when fired returns a Channel (Munch, dict-like)
+                  object representing this Koji channel, or None if no channel
+                  was found.
+        """
+        channelinfo = yield self.call('getChannel', channel_id, **kwargs)
+        channel = Channel.fromDict(channelinfo)
+        if channel:
+            channel.connection = self
+        defer.returnValue(channel)
+
+    @defer.inlineCallbacks
     def getPackage(self, name, **kwargs):
         """
         Load information about a package and return a custom Package class.
@@ -352,6 +371,22 @@ class Connection(object):
             task.connection = self
             tasks.append(task)
         defer.returnValue(tasks)
+
+    @defer.inlineCallbacks
+    def listChannels(self, **kwargs):
+        """
+        Get information about all Koji channels.
+
+        :param **kwargs: keyword args to pass through to listChannels RPC.
+        :returns: deferred that when fired returns a list of Channel objects.
+        """
+        data = yield self.call('listChannels', **kwargs)
+        channels = []
+        for cdata in data:
+            channel = Channel.fromDict(cdata)
+            channel.connection = self
+            channels.append(channel)
+        defer.returnValue(channels)
 
     @defer.inlineCallbacks
     def login(self):
