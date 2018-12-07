@@ -29,3 +29,31 @@ def test_done_group():
     assert task_states.CLOSED in task_states.DONE_GROUP
     assert task_states.CANCELED in task_states.DONE_GROUP
     assert task_states.FAILED in task_states.DONE_GROUP
+
+
+def test_free_to_str():
+    assert task_states.to_str(0) == 'FREE'
+
+
+def test_open_to_str():
+    assert task_states.to_str(1) == 'OPEN'
+
+
+def test_closed_to_str():
+    assert task_states.to_str(2) == 'CLOSED'
+
+
+def test_canceled_to_str():
+    assert task_states.to_str(3) == 'CANCELED'
+
+
+def test_assigned_to_str():
+    assert task_states.to_str(4) == 'ASSIGNED'
+
+
+def test_failed_to_str():
+    assert task_states.to_str(5) == 'FAILED'
+
+
+def test_unknown_to_str():
+    assert task_states.to_str(999) == '(unknown state 999)'

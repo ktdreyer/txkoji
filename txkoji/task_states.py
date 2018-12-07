@@ -8,3 +8,18 @@ FAILED = 5
 
 # Groups:
 DONE_GROUP = (CLOSED, CANCELED, FAILED)
+
+
+def to_str(number):
+    """
+    Convert a task ID number to a string.
+
+    :param int number: task state ID, eg. 1
+    :returns: state name like eg. "OPEN", or "(unknown)" if we don't know the
+              name of this task state ID number.
+    """
+    states = globals()
+    for name, value in states.items():
+        if number == value and name.isalpha() and name.isupper():
+            return name
+    return '(unknown state %d)' % number

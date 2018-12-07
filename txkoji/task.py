@@ -104,6 +104,15 @@ class Task(Munch):
         return datetime.utcfromtimestamp(self.start_ts)
 
     @property
+    def state_name(self):
+        """
+        Return a human-readable name of this task's state.
+
+        :returns: eg. "OPEN"
+        """
+        return task_states.to_str(self.state)
+
+    @property
     def duration(self):
         """
         Return a timedelta for this task.
