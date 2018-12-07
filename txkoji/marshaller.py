@@ -1,9 +1,11 @@
 from twisted.python.compat import long
 try:
-    import xmlrpc
     from xmlrpc.client import Marshaller
+    from xmlrpc.client import MAXINT
+    from xmlrpc.client import MININT
 except ImportError:
-    import xmlrpclib as xmlrpc
+    from xmlrpclib import MAXINT
+    from xmlrpclib import MININT
     from xmlrpclib import Marshaller
 
 
@@ -17,7 +19,7 @@ class KojiMarshaller(Marshaller):
     def dump_int(self, value, write):
         if (value > self.MAXI8 or value < self.MINI8):
             raise OverflowError("long int exceeds XML-RPC limits")
-        elif value > xmlrpc.MAXINT or value < xmlrpc.MININT:
+        elif value > MAXINT or value < MININT:
             write("<!-- using i8 extension -->")
             write("<value><i8>")
             write(str(int(value)))
