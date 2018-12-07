@@ -4,6 +4,7 @@ import posixpath
 from munch import Munch, unmunchify
 from twisted.internet import defer
 from txkoji import task_states
+from txkoji.channel import Channel
 try:
     from urllib.parse import urlparse
     import xmlrpc
@@ -70,6 +71,15 @@ class Task(Munch):
         """
         if self.method == 'tagBuild':
             return self.params[1]
+
+    @property
+    def channel(self):
+        """
+        Return the Channel for this task.
+
+        :returns: an instance of the Channel class.
+        """
+        return Channel({'id': self.channel_id, 'connection': self.connection})
 
     @property
     def completed(self):

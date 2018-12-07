@@ -29,6 +29,9 @@ class TestGetTask(object):
     def test_state_name(self, task):
         assert task.state_name == 'CLOSED'
 
+    def test_channel(self, task):
+        assert task.channel.id == 1
+
     def test_duration(self, task):
         assert task.duration == timedelta(0, 138, 577600)
 
