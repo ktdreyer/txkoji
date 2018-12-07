@@ -135,20 +135,35 @@ class Task(Munch):
             defer.returnValue(subtask_completion)
         if not self.start_ts:
             raise ValueError('no start time, task in %s state' % self.state)
-        package = self.package
-        if not package:
-            # TODO: estimate completion some other way besides
-            # getAverageBuildDuration. For example, we could estimate
-            # completion time for newRepo/createrepo tasks by looking back at
-            # the the past couple of tasks for this tag.
-            defer.returnValue(None)
-        avg_delta = yield self.connection.getAverageBuildDuration(package)
+        avg_delta = yield self.estimate_duration()
         if avg_delta is None:
-            # For example, getAverageBuildDuration does not work for
-            # content-generator builds. See https://pagure.io/koji/issue/1128
             defer.returnValue(None)
         est_completion = self.started + avg_delta
         defer.returnValue(est_completion)
+
+    def estimate_duration(self):
+        """
+        Estimate duration (timedelta) for this task.
+
+        Estimate the average length of time we expect between this task's
+        start and end times.
+
+        :returns: deferred that when fired returns a timedelta object for the
+                  estimated timedelta, or the actual timedelta, or None if we
+                  could not estimate a time for this task method.
+        """
+        if self.completion_ts:
+            # Task is already complete. Return the exact duration timedelta.
+            return defer.succeed(self.duration)
+        if not self.package:
+            # TODO: estimate duration some other way besides
+            # getAverageBuildDuration. For example, we could estimate
+            # completion time for newRepo/createrepo tasks by looking back at
+            # the the past couple of tasks for this tag.
+            return defer.succeed(None)
+        # Note, getAverageBuildDuration does not work for
+        # content-generator builds. See https://pagure.io/koji/issue/1128
+        return self.connection.getAverageBuildDuration(self.package)
 
     @defer.inlineCallbacks
     def estimate_descendents(self):

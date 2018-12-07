@@ -40,6 +40,15 @@ class TestGetTask(object):
         assert task.is_scratch is False
 
     @pytest.inlineCallbacks
+    def test_estimate_duration(self, task):
+        est_duration = yield task.estimate_duration()
+        # Since this build has finished, the estimate_duration() method
+        # should simply return the real duration timedelta.
+        expected = timedelta(0, 138, 577600)
+        assert est_duration == expected
+        assert est_duration == task.duration
+
+    @pytest.inlineCallbacks
     def test_estimate_completion(self, task):
         est_completion = yield task.estimate_completion()
         # Since this build has finished, the estimate_completion() method
