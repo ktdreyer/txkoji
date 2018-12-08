@@ -197,18 +197,17 @@ class Task(Munch):
                   estimate a time for this task method.
         """
         # Query the information we need for this task's channel and package.
-        # (Maybe move some of this code to a Channel class?)
-        hosts_deferred = self.channel.hosts(enabled=True)
+        capacity_deferred = self.channel.total_capacity()
         open_tasks_deferred = self.channel.tasks(state=[task_states.OPEN])
         avg_delta_deferred = self.estimate_duration()
-        deferreds = [hosts_deferred, open_tasks_deferred, avg_delta_deferred]
+        deferreds = [capacity_deferred,
+                     open_tasks_deferred,
+                     avg_delta_deferred]
         results = yield defer.gatherResults(deferreds, consumeErrors=True)
-        hosts, open_tasks, avg_delta = results
+        capacity, open_tasks, avg_delta = results
         # Ensure this task's channel has spare capacity for this task.
-        total_capacity = 0
-        for host in hosts:
-            total_capacity += host.capacity
-        if len(open_tasks) >= total_capacity:
+        open_weight = sum([task.weight for task in open_tasks])
+        if open_weight >= capacity:
             # TODO: Evaluate all tasks in the channel and
             # determine when enough OPEN tasks will complete so that we can
             # get to OPEN.
