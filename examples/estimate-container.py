@@ -1,9 +1,11 @@
+from operator import itemgetter
 from datetime import datetime, timedelta
-from pprint import pprint
 import sys
 from txkoji import Connection
 from txkoji import task_states
-from txkoji import build_states
+from txkoji.task import SLEEPTIME
+from txkoji.estimates import average_build_duration
+from txkoji.estimates import average_build_durations
 from twisted.internet import defer
 from twisted.internet.task import react
 
@@ -17,146 +19,98 @@ def example(reactor):
 
     # Look up the task information:
     task = yield koji.getTaskInfo(task_id)
-    assert task.method == 'buildContainer'
 
     if task.state == task_states.FREE:
-        yield estimate_free(koji, task)
+        # we'll wrap task.estimate_completion in estimate_free() below:
+        # est_complete = yield task.estimate_completion()
+        est_complete = yield estimate_free(koji, task)
+        log_est_complete(est_complete)
     elif task.state == task_states.OPEN:
-        yield estimate_open(koji, task)
+        est_complete = yield task.estimate_completion()
+        log_est_complete(est_complete)
     else:
-        print('final duration: %s' % task.duration)
+        log_delta('final duration: %s', task.duration)
 
 
 @defer.inlineCallbacks
 def estimate_free(koji, task):
-    # Look up how many tasks are ahead of this one.
-    channel_id = task.channel_id
-    free_tasks = yield list_tasks(koji, channel_id, 'FREE')
-    ahead = []
-    for free_task in free_tasks:
-        if task.id > free_task.id:
-            ahead.append(free_task)
-    print('There are %d free buildContainer tasks ahead of this one' %
-          len(ahead))
-    # Note:
-    # If there is more capacity available than total outstanding buildContainer
-    # FREE tasks, then either the system is hung, *or* (more likely) a builder
-    # is about to pick this one up in the next few seconds. If this
-    # task.duration < 60 seconds, then the latter is likely. While we wait for
-    # the builder to pick it up, we could tack on an additional 60 seconds and
-    # then estimate based on that.
-    capacity = yield total_capacity(koji, channel_id)
-    print('This channel can handle %d tasks at a time' % capacity)
+    # Log if it looks like we're hung:
+    waited = datetime.utcnow() - task.created
+    if waited > SLEEPTIME:
+        log_delta('warning: this build has waited in FREE state %s', waited)
+    try:
+        # Test our new "free" code:
+        est_completion = yield task.estimate_completion()
+        if not est_completion:
+            err = 'could not estimate with task.estimate_completion()'
+            raise RuntimeError(err)
+        defer.returnValue(est_completion)
+    except NotImplementedError:
+        pass  # channel at capacity
+    print('channel %d is at capacity' % task.channel_id)
     # From this point on, we assume that all the OPEN tasks are going to be
     # faster than the fastest FREE tasks that are still in the queue. If this
     # is not the case, then our estimate will be longer than reality.
-    # Estimate the duration of each open task.
-    open_tasks = yield list_tasks(koji, channel_id, 'OPEN')
-    packages = set()
+
+    # See how many packages are ahead of us in the queue.
+    ahead_free = yield task.channel.tasks(state=[task_states.FREE],
+                                          createdBefore=task.create_ts)
+    print('%d tasks are in FREE state ahead of us' % len(ahead_free))
+    ahead_weight = sum([task.weight for task in ahead_free])
+    print('the total weight of the ahead FREE tasks is %s' % ahead_weight)
+
     # Calculate the average durations for all OPEN "packages".
-    for open_task in open_tasks:
-        # Sanity-check while we're here:
-        if open_task.method != 'buildContainer':
-            raise RuntimeError('%s is not buildContainer' % open_task.url)
-        packages.add(open_task.package)
-    print('checking avg build duration for %i packages:' % len(packages))
-    packages = list(packages)
-    deferreds = [average_build_duration(koji, package) for package in packages]
-    results = yield defer.gatherResults(deferreds, consumeErrors=True)
-    avg_durations = dict(zip(packages, results))
-    # pprint(avg_durations)
-    # Determine estimates for all our tasks.
-    open_estimates = []
-    utcnow = datetime.utcnow()
-    for open_task in open_tasks:
-        duration = avg_durations[open_task.package]
-        est_complete = open_task.started + duration
-        remaining = est_complete - utcnow
-        if remaining.total_seconds() < 0:
-            description = describe_delta(remaining)
-            package = open_task.package
-            print('warning: %d %s exceeds est by %s' %
-                  (open_task.id, package, description))
-        else:
-            open_estimates.append(remaining)
-    # Sort by estimated completion:
-    sorted_estimates = sorted(open_estimates)
-    # Find the "ahead" number (eg. "10") shortest tasks.
-    ahead_estimates = sorted_estimates[:len(ahead)]
-    # The longest of that number is how long we have to wait to get to OPEN.
-    if ahead_estimates:
-        longest = ahead_estimates[-1]
-    else:
-        longest = timedelta(0)
-    print('The longest OPEN task estimate until we get to OPEN: %s' % longest)
+    open_estimates = yield task_estimates(task.channel, [task_states.OPEN])
+
+    # Sort by time remaining:
+    sorted_estimates = sorted(open_estimates, key=itemgetter(1))
+
+    # Find the "longest" task until we get to our desired weight_count.
+    longest = timedelta(0)
+    weight_count = 0
+    for task, longest in sorted_estimates:
+        weight_count += task.weight
+        # In "longest" time, we will have "weight_count" free.
+        if weight_count >= ahead_weight:
+            break
+    log_delta('Longest OPEN task estimate until we get to OPEN: %s', longest)
+
     avg_duration = yield average_build_duration(koji, task.package)
     remaining = longest + avg_duration
-    description = describe_delta(remaining)
-    print('Our task should be complete in %s' % description)
+    est_complete = datetime.utcnow() + remaining
+    defer.returnValue(est_complete)
 
 
-@defer.inlineCallbacks
-def estimate_open(koji, task):
-    # TODO: take branches into account when estimating a task.
-    # - Look at this build target, determine the destination tag, and then list
-    #   the 10 most recent builds that are tagged into that destination.
-    #   Average the duration for that list of builds.
-    # - If we could not find anything tagged into that destination yet, fall
-    #   back to simply searching the 10 most recent build overall and averaging
-    #   those build's durations.
-    # - If there is no recent build (it's an entirely new package), return
-    #   None.
-    duration = yield average_build_duration(koji, task.package)
-    est_complete = task.started + duration
-    remaining = est_complete - datetime.utcnow()
-    description = describe_delta(remaining)
-    if remaining.total_seconds() > 0:
-        print('this task should be complete in %s' % description)
-    else:
-        print('this task exceeds the last build by %s' % description)
-
-
-@defer.inlineCallbacks
-def average_build_duration(koji, package, limit=5):
+def task_estimates(channel, states):
     """
-    Find the average duration time for the last couple of builds.
+    Estimate remaining time for all tasks in this channel.
 
-    :returns: deferred that when fired returns a datetime.timedelta object
+    :param channel: txkoji.channel.Channel
+    :param list states: list of task_states ints, eg [task_states.OPEN]
+    :returns: deferred that when fired returns a list of
+              (task, est_remaining) tuples
     """
-    state = build_states.COMPLETE
-    opts = {'limit': 5, 'order': '-completion_time'}
-    builds = yield koji.listBuilds(package, state=state, queryOpts=opts)
-    durations = [build.duration for build in builds]
-    average = sum(durations, timedelta()) / limit
-    print('average duration for %s is %s' % (package, average))
-    defer.returnValue(average)
-
-
-def list_tasks(koji, channel_id, state_name):
-    """
-    List all the tasks for this channel
-
-    :param: state_name: eg "FREE"
-    :returns: deferred that when fired returns a list of tasks
-    """
-    # state_names = ['FREE', 'ASSIGNED']
-    # states = [getattr(task_states, name) for name in state_names]
-    state = getattr(task_states, state_name)
-    opts = {'state': [state], 'channel_id': channel_id}
-    qopts = {'order': 'priority,create_time'}
-    return koji.listTasks(opts, qopts)
-
-
-@defer.inlineCallbacks
-def total_capacity(koji, channel_id):
-    """
-    Look up the current capacity for this channel.
-    """
-    total_capacity = 0
-    hosts = yield koji.listHosts(channelID=channel_id, enabled=True)
-    for host in hosts:
-        total_capacity += host.capacity
-    defer.returnValue(total_capacity)
+    for state in states:
+        if state != task_states.OPEN:
+            raise NotImplementedError('only estimate OPEN tasks')
+    tasks = yield channel.tasks(state=states)
+    # Estimate all the unique packages.
+    packages = set([task.package for task in tasks])
+    print('checking avg build duration for %i packages:' % len(packages))
+    packages = list(packages)
+    durations = yield average_build_durations(channel.connection, packages)
+    avg_package_durations = dict(zip(packages, durations))
+    # pprint(avg_package_durations)
+    # Determine estimates for all our tasks.
+    results = []
+    utcnow = datetime.utcnow()
+    for task in tasks:
+        avg_duration = avg_package_durations[task.package]
+        est_complete = task.started + avg_duration
+        est_remaining = est_complete - utcnow
+        result = (task, est_remaining)
+        results.append(result)
+    defer.returnValue(results)
 
 
 def describe_delta(delta):
@@ -175,6 +129,25 @@ def describe_delta(delta):
     if minutes:
         return '%d min %d secs' % (minutes, seconds)
     return '%d secs' % seconds
+
+
+def log_est_complete(est_complete):
+    """
+    Log the relative time remaining for this est_complete datetime object.
+    """
+    if not est_complete:
+        print('could not determine an estimated completion time')
+        return
+    remaining = est_complete - datetime.utcnow()
+    message = 'this task should be complete in %s'
+    if remaining.total_seconds() < 0:
+        message = 'this task exceeds estimate by %s'
+    log_delta(message, remaining)
+
+
+def log_delta(message, delta):
+    description = describe_delta(delta)
+    print(message % description)
 
 
 if __name__ == '__main__':
