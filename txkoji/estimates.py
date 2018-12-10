@@ -1,5 +1,5 @@
 from datetime import timedelta
-import build_states
+from txkoji import build_states
 from twisted.internet import defer
 
 
