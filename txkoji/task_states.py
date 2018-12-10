@@ -13,7 +13,7 @@ DONE_GROUP = (CLOSED, CANCELED, FAILED)
 
 def to_str(number):
     """
-    Convert a task ID number to a string.
+    Convert a task state ID number to a string.
 
     :param int number: task state ID, eg. 1
     :returns: state name like eg. "OPEN", or "(unknown)" if we don't know the
