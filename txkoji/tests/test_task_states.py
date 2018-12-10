@@ -25,6 +25,12 @@ def test_failed():
     assert task_states.FAILED == 5
 
 
+def test_active_group():
+    assert task_states.FREE in task_states.ACTIVE_GROUP
+    assert task_states.OPEN in task_states.ACTIVE_GROUP
+    assert task_states.ASSIGNED in task_states.ACTIVE_GROUP
+
+
 def test_done_group():
     assert task_states.CLOSED in task_states.DONE_GROUP
     assert task_states.CANCELED in task_states.DONE_GROUP
