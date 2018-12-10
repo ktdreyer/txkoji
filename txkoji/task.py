@@ -358,7 +358,7 @@ class Task(Munch):
             # Note: buildArch tag will be an int here.
             return self.params[1]
         if self.method in ('createdistrepo', 'distRepo', 'newRepo', 'runroot',
-                           'tagBuild'):
+                           'tagBuild', 'waitrepo'):
             return self.params[0]
         if self.method == 'tagNotification':
             return self.params[2]
