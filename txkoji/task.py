@@ -186,6 +186,11 @@ class Task(Munch):
             # completion time for newRepo/createrepo tasks by looking back at
             # the the past couple of tasks for this tag.
             return defer.succeed(None)
+        if self.method == 'tagBuild':
+            # These are pretty short. Haphazardly guess the max SLEEPTIME plus
+            # a few seconds.
+            tag_build_time = SLEEPTIME + timedelta(seconds=15)
+            return defer.succeed(tag_build_time)
         return average_build_duration(self.connection, self.package)
 
     @defer.inlineCallbacks
