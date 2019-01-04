@@ -493,7 +493,7 @@ class Connection(object):
 
     def _munchify_callback(self, value):
         """
-        Fires when we get user information back from the XML-RPC server.
+        Fires when we get information back from the XML-RPC server.
 
         This is a generic callback for when we do not want to post-process the
         XML-RPC server's data further.
