@@ -24,6 +24,7 @@ except ImportError:
 from txkoji.query_factory import KojiQueryFactory
 from txkoji.cache import Cache
 from txkoji.call import Call
+from txkoji.multicall import MultiCall
 from txkoji.channel import Channel
 from txkoji.task import Task
 from txkoji.build import Build
@@ -387,6 +388,9 @@ class Connection(object):
             channel.connection = self
             channels.append(channel)
         defer.returnValue(channels)
+
+    def MultiCall(self):
+        return MultiCall(self)
 
     @defer.inlineCallbacks
     def login(self):

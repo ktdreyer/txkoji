@@ -2,7 +2,7 @@ class Call(object):
     """
     Callable abstract class representing a Koji RPC, eg "getTag".
 
-    :param connection: ``txkoji.Connection``
+    :param connection: ``txkoji.Connection`` or ``txkoji.MultiCall``
     :param name: XML-RPC method name to call on the server, eg. "getTag".
     """
     def __init__(self, connection, name):

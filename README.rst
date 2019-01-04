@@ -148,6 +148,41 @@ More special return values:
 * The ``task_id`` property is populated on OSBS's CG container builds (a
   workaround for https://pagure.io/koji/issue/215).
 
+
+Multi-call support
+------------------
+
+If you have to submit many RPCs to koji-hub at once, you can optimize this
+with "multicall".
+
+Koji's XML-RPC implementation allows you to batch or "boxcar" many methods up
+into one single "multicall" RPC and send it to the server as one single HTTP
+request.
+
+.. code-block:: python
+
+    @defer.inlineCallbacks
+    def example(reactor):
+        koji = Connection('mykoji')
+
+        multicall = koji.MultiCall()
+        # Query the task information for several tasks in one shot:
+        multicall.getTaskInfo(123)
+        multicall.getTaskInfo(456)
+        multicall.getTaskInfo(789)
+        results = yield multicall()
+        # results is a xmlrpc.client.MultiCallIterator
+        for task in iter(results):
+            print(task.id)  # eg. "123" or "456" or "789"
+            print(task.method)  # eg. "tagBuild"
+
+This is a bit similar to Twisted's ``DeferredList`` / ``gatherResults``,
+although it happens server-side instead of purely client-side.
+
+If the hub returns an error for any of the calls within the multicall, the
+iterator will raise ``KojiException`` when iterating over the specific call
+result that had the error.
+
 Message Parsing
 ---------------
 
@@ -171,7 +206,6 @@ TODO:
   task, and not something else, like the buildSRPMFromSCM time, nor even the
   overall build task's time. This has implications for estimating scratch
   builds. (comparing our tasks' times to getAverageBuildDuration)
-* Multi-call support
 
 Packages that use this package
 ==============================
