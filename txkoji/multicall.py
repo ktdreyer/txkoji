@@ -118,6 +118,6 @@ class KojiMultiCallIterator(MultiCallIterator):
                     return item
         if isinstance(value, list):
             # Do this same rich item conversion for list of Munch objects
-            items_list = [self.rich_item(item) for item in value]
+            items_list = [self.rich_item(val) for val in value]
             return items_list
         return value
