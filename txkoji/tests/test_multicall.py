@@ -1,6 +1,7 @@
 from twisted.web.xmlrpc import Proxy
 from twisted.internet import defer
 import pytest
+import pytest_twisted
 from txkoji import Connection
 from txkoji.exceptions import KojiException
 from txkoji.task import Task
@@ -43,7 +44,7 @@ def koji(monkeypatch):
     return koji
 
 
-@pytest.inlineCallbacks
+@pytest_twisted.inlineCallbacks
 def test_multicall(koji):
     multicall = koji.MultiCall()
     multicall.getAPIVersion()
@@ -51,7 +52,7 @@ def test_multicall(koji):
     assert list(results) == [1]
 
 
-@pytest.inlineCallbacks
+@pytest_twisted.inlineCallbacks
 def test_multicall_error(koji):
     # Test one good call, and one bad call, and the iterator should raise on
     # the bad call, just like the normal XML-RPC client.
@@ -65,7 +66,7 @@ def test_multicall_error(koji):
         next(resultsiter)
 
 
-@pytest.inlineCallbacks
+@pytest_twisted.inlineCallbacks
 def test_multicall_type(koji):
     multicall = koji.MultiCall()
     multicall.getTaskInfo(12345)

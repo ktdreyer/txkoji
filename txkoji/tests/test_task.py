@@ -45,7 +45,7 @@ class TestGetTask(object):
     def test_is_scratch(self, task):
         assert task.is_scratch is False
 
-    @pytest.inlineCallbacks
+    @pytest_twisted.inlineCallbacks
     def test_estimate_duration(self, task):
         est_duration = yield task.estimate_duration()
         # Since this build has finished, the estimate_duration() method
@@ -54,7 +54,7 @@ class TestGetTask(object):
         assert est_duration == expected
         assert est_duration == task.duration
 
-    @pytest.inlineCallbacks
+    @pytest_twisted.inlineCallbacks
     def test_estimate_completion(self, task):
         est_completion = yield task.estimate_completion()
         # Since this build has finished, the estimate_completion() method

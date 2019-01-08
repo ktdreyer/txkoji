@@ -1,5 +1,6 @@
 from munch import Munch
 import pytest
+import pytest_twisted
 from twisted.internet import defer
 from txkoji import Connection
 from txkoji.exceptions import KojiLoginException
@@ -21,7 +22,7 @@ def fake_post_unauthorized(url, data=None, **kwargs):
 
 class TestLogin(object):
 
-    @pytest.inlineCallbacks
+    @pytest_twisted.inlineCallbacks
     def test_login_success(self, monkeypatch):
         monkeypatch.setattr('treq_kerberos.post', fake_post_ok)
         koji = Connection('mykoji')
@@ -30,14 +31,14 @@ class TestLogin(object):
         assert koji.session_id == 12345678
         assert koji.session_key == '1234-abcdefghijklmnopqrst'
 
-    @pytest.inlineCallbacks
+    @pytest_twisted.inlineCallbacks
     def test_login_failure(self, monkeypatch):
         monkeypatch.setattr('treq_kerberos.post', fake_post_unauthorized)
         koji = Connection('mykoji')
         with pytest.raises(KojiLoginException):
             yield koji.login()
 
-    @pytest.inlineCallbacks
+    @pytest_twisted.inlineCallbacks
     def test_authenticated_call(self, monkeypatch):
         monkeypatch.setattr('treq_kerberos.post', fake_post_ok)
         monkeypatch.setattr('txkoji.connection.Proxy', FakeProxy)

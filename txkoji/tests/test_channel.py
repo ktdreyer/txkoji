@@ -29,7 +29,7 @@ class TestGetChannel(object):
     def test_connection(self, channel):
         assert isinstance(channel.connection, Connection)
 
-    @pytest.inlineCallbacks
+    @pytest_twisted.inlineCallbacks
     def test_hosts(self, channel):
         hosts = yield channel.hosts(enabled=True)
         expected = [
@@ -56,7 +56,7 @@ class TestGetChannel(object):
          ]
         assert hosts == expected
 
-    @pytest.inlineCallbacks
+    @pytest_twisted.inlineCallbacks
     def test_total_capacity(self, channel):
         total_capacity = yield channel.total_capacity()
         expected = 46.0

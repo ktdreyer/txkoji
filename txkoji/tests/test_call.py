@@ -1,12 +1,12 @@
 from munch import Munch
-import pytest
+import pytest_twisted
 from txkoji.connection import Connection
 from txkoji.tests.util import FakeProxy
 
 
 class TestCall(object):
 
-    @pytest.inlineCallbacks
+    @pytest_twisted.inlineCallbacks
     def test_getuser(self, monkeypatch):
         # brew call getUser kdreyer@REDHAT.COM \
         #   --json-output > txkoji/tests/fixtures/calls/getUser.json

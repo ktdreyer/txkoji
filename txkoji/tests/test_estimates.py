@@ -1,5 +1,6 @@
 from datetime import timedelta
 import pytest
+import pytest_twisted
 from txkoji import Connection
 from txkoji.tests.util import FakeProxy
 from txkoji.estimates import average_build_duration
@@ -13,14 +14,14 @@ def koji(monkeypatch):
     return koji
 
 
-@pytest.inlineCallbacks
+@pytest_twisted.inlineCallbacks
 def test_average_build_duration(koji):
     avg_duration = yield average_build_duration(koji, 'ceph-ansible')
     expected = timedelta(0, 143, 401978)
     assert avg_duration == expected
 
 
-@pytest.inlineCallbacks
+@pytest_twisted.inlineCallbacks
 def test_average_build_durations(koji):
     avg_durations = yield average_build_durations(koji, ['ceph-ansible'])
     expected_delta = timedelta(0, 143, 401978)

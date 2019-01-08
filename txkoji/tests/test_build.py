@@ -39,7 +39,7 @@ class TestGetBuild(object):
         # TODO: test with a build fixture where we have a real source URL
         assert build.gitbuildhash is None
 
-    @pytest.inlineCallbacks
+    @pytest_twisted.inlineCallbacks
     def test_estimate_completion(self, build):
         est_completion = yield build.estimate_completion()
         # Since this build has finished, the estimate_completion() method
