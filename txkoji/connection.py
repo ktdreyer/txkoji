@@ -353,6 +353,22 @@ class Connection(object):
             builds.append(build)
         defer.returnValue(builds)
 
+    def listTagged(self, *args, **kwargs):
+        """
+        List builds tagged with a tag.
+
+        Calls "listTagged" XML-RPC.
+
+        :returns: deferred that when fired returns a list of Build objects.
+        """
+        data = yield self.call('listTagged', *args, **kwargs)
+        builds = []
+        for bdata in data:
+            build = Build.fromDict(bdata)
+            build.connection = self
+            builds.append(build)
+        defer.returnValue(builds)
+
     @defer.inlineCallbacks
     def listTasks(self, opts={}, queryOpts={}):
         """

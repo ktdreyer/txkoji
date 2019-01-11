@@ -128,7 +128,7 @@ Munch class:
 
 * ``getBuild`` returns ``txkoji.build.Build``
 * ``getChannel`` returns ``txkoji.channel.Channel``
-* ``listBuilds`` returns a ``list`` of ``txkoji.build.Build``
+* ``listBuilds`` and ``listTagged`` returns a ``list`` of ``txkoji.build.Build``
 * ``getTaskInfo`` returns ``txkoji.task.Task``
 * ``getPackage`` returns ``txkoji.package.Package``
 
