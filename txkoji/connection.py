@@ -353,6 +353,7 @@ class Connection(object):
             builds.append(build)
         defer.returnValue(builds)
 
+    @defer.inlineCallbacks
     def listTagged(self, *args, **kwargs):
         """
         List builds tagged with a tag.
