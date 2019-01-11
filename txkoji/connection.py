@@ -32,9 +32,6 @@ from txkoji.package import Package
 from txkoji.exceptions import KojiException, KojiLoginException
 
 
-__version__ = '0.5.0'
-
-
 PROFILES = ('~/.koji/config.d/*.conf', '/etc/koji.conf.d/*.conf')
 
 
