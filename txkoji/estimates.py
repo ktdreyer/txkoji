@@ -29,8 +29,10 @@ def average_build_durations(connection, packages):
     :param list packages: package names
     :returns: deferred that when fired returns a list of timdelta objects
     """
-    deferreds = [average_build_duration(connection, pkg) for pkg in packages]
-    return defer.gatherResults(deferreds, consumeErrors=True)
+    multicall = connection.MultiCall()
+    for pkg in packages:
+        average_build_duration(multicall, pkg)
+    return multicall()
 
 
 @defer.inlineCallbacks
