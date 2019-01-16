@@ -34,7 +34,7 @@ class MultiCall(object):
         Resets the list of stored calls.
         :returns: deferred that when fired returns an iterator for results,
                   one for each call. The results will either be Munch objects,
-                  or else
+                  or else raise exceptions.
         """
         d = self.connection.call('system.multicall', self.calls)
         d.addCallback(self._multicall_callback, self.calls)
