@@ -27,7 +27,8 @@ def average_build_durations(connection, packages):
 
     :param connection: txkoji.Connection
     :param list packages: package names
-    :returns: deferred that when fired returns a list of timdelta objects
+    :returns: deferred that when fired returns a KojiMultiCallIterator, which
+              has a list of timdelta objects.
     """
     multicall = connection.MultiCall()
     for pkg in packages:
