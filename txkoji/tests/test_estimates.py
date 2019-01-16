@@ -1,4 +1,6 @@
 from datetime import timedelta
+from twisted.internet import defer
+from twisted.web.xmlrpc import Proxy
 import pytest
 import pytest_twisted
 from txkoji import Connection
@@ -14,6 +16,26 @@ def koji(monkeypatch):
     return koji
 
 
+class FakeMulticallProxy(Proxy):
+
+    def callRemote(self, action, *args):
+        """
+        Return a deferred that always fires successfully for system.multicall
+
+        This expects every multicall to be "getAverageBuildDuration" and
+        returns a hard-coded float value for that.
+        """
+        if action != 'system.multicall':
+            raise ValueError(action)
+        calls = args[0]
+        response = []
+        for call in calls:
+            assert call['methodName'] == 'getAverageBuildDuration'
+            result = 143.401978
+            response.append([result])
+        return defer.succeed(response)
+
+
 @pytest_twisted.inlineCallbacks
 def test_average_build_duration(koji):
     avg_duration = yield average_build_duration(koji, 'ceph-ansible')
@@ -22,7 +44,9 @@ def test_average_build_duration(koji):
 
 
 @pytest_twisted.inlineCallbacks
-def test_average_build_durations(koji):
+def test_average_build_durations(monkeypatch):
+    monkeypatch.setattr('txkoji.connection.Proxy', FakeMulticallProxy)
+    koji = Connection('mykoji')
     avg_durations = yield average_build_durations(koji, ['ceph-ansible'])
     expected_delta = timedelta(0, 143, 401978)
-    assert avg_durations == [expected_delta]
+    assert list(avg_durations) == [expected_delta]
