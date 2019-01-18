@@ -16,7 +16,7 @@ def average_build_duration(connection, package):
     :param package: package name
     :returns: deferred that when fired returns a datetime.timedelta object
     """
-    if package.endswith('-container'):
+    if isinstance(package, str) and package.endswith('-container'):
         return average_last_builds(connection, package)
     return connection.getAverageBuildDuration(package)
 
