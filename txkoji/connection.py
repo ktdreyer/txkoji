@@ -374,8 +374,8 @@ class Connection(object):
 
         Calls "listTasks" XML-RPC.
 
-        :param opts: ``dict``. Eg. {'state': [task_states.OPEN]}
-        :param queryOpts: ``dict``. Eg. {'order' : 'priority,create_time'}
+        :param dict opts: Eg. {'state': [task_states.OPEN]}
+        :param dict queryOpts: Eg. {'order' : 'priority,create_time'}
         :returns: deferred that when fired returns a list of Task objects.
         """
         opts['decode'] = True  # decode xmlrpc data in "request"
