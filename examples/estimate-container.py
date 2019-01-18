@@ -3,7 +3,6 @@ from datetime import datetime, timedelta
 import sys
 from txkoji import Connection
 from txkoji import task_states
-from txkoji.task import SLEEPTIME
 from txkoji.estimates import average_build_duration
 from txkoji.estimates import average_build_durations
 from twisted.internet import defer
@@ -34,10 +33,6 @@ def example(reactor):
 
 @defer.inlineCallbacks
 def estimate_free(koji, task):
-    # Log if it looks like we're hung:
-    waited = datetime.utcnow() - task.created
-    if waited > SLEEPTIME:
-        log_delta('warning: this build has waited in FREE state %s', waited)
     try:
         # Test our new "free" code:
         est_completion = yield task.estimate_completion()
