@@ -330,6 +330,8 @@ class Connection(object):
 
         Calls "listBuilds" XML-RPC, with an enhancement: you can also pass a
         string here for the package name instead of the package ID number.
+        See https://pagure.io/koji/issue/1209 for implementing this
+        server-side.
 
         :param package: ``int`` (packageID) or ``str`` (package name).
         :returns: deferred that when fired returns a list of Build objects
