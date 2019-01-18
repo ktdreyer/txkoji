@@ -81,6 +81,7 @@ def estimate_free(koji, task):
     defer.returnValue(est_complete)
 
 
+@defer.inlineCallbacks
 def task_estimates(channel, states):
     """
     Estimate remaining time for all tasks in this channel.
