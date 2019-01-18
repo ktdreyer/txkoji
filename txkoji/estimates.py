@@ -23,7 +23,7 @@ def average_build_duration(connection, package):
 
 def average_build_durations(connection, packages):
     """
-    Return the average build duration for a package (or container).
+    Return the average build duration for list of packages (or containers).
 
     :param connection: txkoji.Connection
     :param list packages: package names
