@@ -141,9 +141,11 @@ def log_est_complete(est_complete):
     log_delta(message, remaining)
 
 
-def log_delta(message, delta):
+def log_delta(message, delta, *args):
     description = describe_delta(delta)
-    print(message % description)
+    format_args = list(args)
+    format_args.insert(0, description)
+    print(message % tuple(format_args))
 
 
 if __name__ == '__main__':
