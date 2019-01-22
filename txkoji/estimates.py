@@ -36,15 +36,13 @@ def average_build_durations(connection, packages):
     if len(containers) == len(packages):
         containers = True
     elif len(containers) == 0:
-        containers = True
+        containers = False
     else:
         # This is going to be too complicated to do with multicalls.
         raise NotImplementedError('cannot mix containers and non-containers')
 
     if not containers:
         multicall = connection.MultiCall()
-        for name in packages:
-            multicall.getPackage(name)
         multicall.getAverageBuildDuration(name)
         result = yield multicall()
         defer.returnValue(result)
