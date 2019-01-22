@@ -14,8 +14,6 @@ install:
   - pip install --upgrade pytest>=2.8
     # Temporary workaround for requests + idna incompatibility:
   - pip install "idna<2.8"
-    # Temporary workaround for pytest 4.1 + pytest incompatibility:
-  - pip install git+https://github.com/pytest-dev/pytest-twisted@master
 script:
   - python setup.py test
 cache: pip
