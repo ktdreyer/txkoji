@@ -43,7 +43,8 @@ def average_build_durations(connection, packages):
 
     if not containers:
         multicall = connection.MultiCall()
-        multicall.getAverageBuildDuration(name)
+        for name in packages:
+            multicall.getAverageBuildDuration(name)
         result = yield multicall()
         defer.returnValue(result)
 
