@@ -3,6 +3,12 @@ from twisted.python.compat import unicode
 from twisted.internet import defer
 from txkoji.marshaller import KojiMarshaller
 
+"""
+This module uses the private twisted.web.xmlrpc._QueryFactory class. See
+https://twistedmatrix.com/trac/ticket/9350 which tracks making this class a
+public class instead and documenting its use.
+"""
+
 
 class KojiQueryFactory(_QueryFactory):
     def __init__(self, path, host, method, user=None, password=None,
