@@ -1,3 +1,5 @@
+import os
+from twisted.internet.ssl import platformTrust
 from twisted.internet.ssl import optionsForClientTLS
 from twisted.internet._sslverify import IOpenSSLTrustRoot
 from twisted.web.client import BrowserLikePolicyForHTTPS
@@ -6,25 +8,24 @@ from zope.interface import implementer
 """
 This module provides some helper classes for working with Client SSL
 authentication and Twisted.
-
-There is no simple way to trust an SSL certificate bundle with Twisted. Twisted
-exposes "trustRoot" that expects a trustRootFromCertificates (list of
-Certificate objects), but Certificate.loadPEM() can only load a single PEM file
-at a time. This means we cannot do something simple like
-Certificate.loadPEM('/etc/pki/tls/certs/ca-bundle.trust.crt').
-
-https://stackoverflow.com/questions/26166444/twisted-python-how-to-create-a-twisted-web-client-browserlikepolicyforhttps-with
-
-The solution is to implement our own RootCATrustRoot trustRoot class that
-points at a single SSL root bundle.
-
-Warning: this uses several private Twisted interfaces, (_sslverify and
-IOpenSSLTrustRoot), so this might break with future Twisted releases.
-
-If this ends up being too fragile, we could just take this out and require
-users to trust their custom Koji CAs system-wide. Alternatively, OpenSSL will
-load a custom CA from the SSL_CERT_FILE environmnet variable.
 """
+
+
+def trustRoot(serverca=None):
+    """
+    Return a trustRoot object for this connection.
+
+    :param str serverca: Path to a PEM-formatted CA certificate to trust.
+                         If the user does not specify a serverca, the default
+                         behavior is to return the system-wide CA bundle
+                         with platformTrust().
+    :returns: This return value is intended as the trustRoot argument to
+              ClientCertPolicy() or optionsForClientTLS().
+    """
+    if serverca:
+        servercafile = os.path.expanduser(serverca)
+        return RootCATrustRoot(servercafile)
+    return platformTrust()
 
 
 class ClientCertPolicy(BrowserLikePolicyForHTTPS):

@@ -11,7 +11,7 @@ from twisted.internet import reactor
 from twisted.internet.ssl import PrivateCertificate
 from twisted.web.client import Agent
 from twisted.web.client import ResponseFailed
-from txkoji.ssl import ClientCertPolicy, RootCATrustRoot
+from txkoji.ssl import trustRoot, ClientCertPolicy
 try:
     from configparser import SafeConfigParser
     from urllib.parse import urlencode, urlparse, parse_qs
@@ -459,14 +459,9 @@ class Connection(object):
         with open(certfile) as certfp:
             pemdata = certfp.read()
             client_cert = PrivateCertificate.loadPEM(pemdata)
-
-        trustRoot = None  # Use Twisted's platformTrust().
-        # Optionally load "serverca" into a Certificate.
-        if self.serverca:
-            servercafile = os.path.expanduser(self.serverca)
-            trustRoot = RootCATrustRoot(servercafile)
-
-        policy = ClientCertPolicy(trustRoot=trustRoot, client_cert=client_cert)
+        # Load serverca into a Certificate (or load platformTrust).
+        root = trustRoot(self.serverca)
+        policy = ClientCertPolicy(trustRoot=root, client_cert=client_cert)
         return Agent(reactor, policy)
 
     def _ssl_login(self):
