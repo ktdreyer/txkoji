@@ -10,6 +10,7 @@ from twisted.internet import defer
 from twisted.internet import reactor
 from twisted.internet.ssl import PrivateCertificate
 from twisted.web.client import Agent
+from twisted.web.client import BrowserLikePolicyForHTTPS
 from twisted.web.client import ResponseFailed
 from txkoji.ssl import trustRoot, ClientCertPolicy
 try:
@@ -448,7 +449,11 @@ class Connection(object):
         """
         method = treq_kerberos.post
         auth = treq_kerberos.TreqKerberosAuth(force_preemptive=True)
-        return self._request_login(method, auth=auth)
+
+        policy = BrowserLikePolicyForHTTPS(trustRoot=self.trustRoot)
+        agent = Agent(reactor, policy)
+
+        return self._request_login(method, agent=agent, auth=auth)
 
     def _ssl_agent(self):
         """
