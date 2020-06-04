@@ -61,6 +61,7 @@ class Connection(object):
         if not self.url:
             msg = 'no server configured at %s for %s' % (PROFILES, profile)
             raise ValueError(msg)
+        self.trustRoot = trustRoot(self.serverca)
         self.proxy = Proxy(self.url.encode(), allowNone=True)
         self.proxy.queryFactory = KojiQueryFactory
         self.cache = Cache(self)
@@ -459,9 +460,9 @@ class Connection(object):
         with open(certfile) as certfp:
             pemdata = certfp.read()
             client_cert = PrivateCertificate.loadPEM(pemdata)
-        # Load serverca into a Certificate (or load platformTrust).
-        root = trustRoot(self.serverca)
-        policy = ClientCertPolicy(trustRoot=root, client_cert=client_cert)
+
+        policy = ClientCertPolicy(trustRoot=self.trustRoot,
+                                  client_cert=client_cert)
         return Agent(reactor, policy)
 
     def _ssl_login(self):
