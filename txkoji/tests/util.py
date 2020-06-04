@@ -1,5 +1,5 @@
-from twisted.web.xmlrpc import Proxy
 from twisted.internet import defer
+from txkoji.proxy import TrustedProxy
 import json
 import os
 
@@ -7,7 +7,7 @@ TESTS_DIR = os.path.dirname(os.path.abspath(__file__))
 FIXTURES_DIR = os.path.join(TESTS_DIR, 'fixtures')
 
 
-class FakeProxy(Proxy):
+class FakeProxy(TrustedProxy):
     def callRemote(self, action, *args):
         """ Return a deferred that always fires successfully """
         filename = action + '.json'

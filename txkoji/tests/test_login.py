@@ -41,7 +41,7 @@ class TestLogin(object):
     @pytest_twisted.inlineCallbacks
     def test_authenticated_call(self, monkeypatch):
         monkeypatch.setattr('treq_kerberos.post', fake_post_ok)
-        monkeypatch.setattr('txkoji.connection.Proxy', FakeProxy)
+        monkeypatch.setattr('txkoji.connection.TrustedProxy', FakeProxy)
         koji = Connection('mykoji')
         yield koji.login()
 

@@ -12,7 +12,7 @@ class TestGetChannel(object):
         # To create this fixture file:
         # cbs call getChannel 2 \
         #   --json-output > txkoji/tests/fixtures/calls/getChannel.json
-        monkeypatch.setattr('txkoji.connection.Proxy', FakeProxy)
+        monkeypatch.setattr('txkoji.connection.TrustedProxy', FakeProxy)
         koji = Connection('mykoji')
         d = koji.getChannel(2)
         return pytest_twisted.blockon(d)
@@ -70,7 +70,7 @@ class TestListChannels(object):
         # To create this fixture file:
         # cbs call listChannels \
         #   --json-output > txkoji/tests/fixtures/calls/listChannels.json
-        monkeypatch.setattr('txkoji.connection.Proxy', FakeProxy)
+        monkeypatch.setattr('txkoji.connection.TrustedProxy', FakeProxy)
         koji = Connection('mykoji')
         d = koji.listChannels()
         return pytest_twisted.blockon(d)

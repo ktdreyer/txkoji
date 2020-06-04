@@ -56,7 +56,7 @@ class TestFromWeb(object):
         # To create this fixture file:
         # cbs call getBuild 24284 \
         #   --json-output > txkoji/tests/fixtures/calls/getBuild.json
-        monkeypatch.setattr('txkoji.connection.Proxy', FakeProxy)
+        monkeypatch.setattr('txkoji.connection.TrustedProxy', FakeProxy)
         teststr = 'https://koji.example.com/koji/buildinfo?buildID=24284'
         koji = Connection('mykoji')
         build = yield koji.from_web(teststr)
@@ -66,14 +66,14 @@ class TestFromWeb(object):
     @pytest_twisted.inlineCallbacks
     @pytest.mark.parametrize('teststr', bad_web_url_matrix())
     def test_bad(self, monkeypatch, teststr):
-        monkeypatch.setattr('txkoji.connection.Proxy', FakeProxy)
+        monkeypatch.setattr('txkoji.connection.TrustedProxy', FakeProxy)
         koji = Connection('mykoji')
         resource = yield koji.from_web(teststr)
         assert resource is None
 
     @pytest_twisted.inlineCallbacks
     def test_malformed(self, monkeypatch):
-        monkeypatch.setattr('txkoji.connection.Proxy', FakeProxy)
+        monkeypatch.setattr('txkoji.connection.TrustedProxy', FakeProxy)
         teststr = 'https://koji.example.com/koji/buildinfo?buildID=24284whoops'
         koji = Connection('mykoji')
         resource = yield koji.from_web(teststr)

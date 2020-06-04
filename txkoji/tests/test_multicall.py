@@ -1,13 +1,13 @@
-from twisted.web.xmlrpc import Proxy
 from twisted.internet import defer
 import pytest
 import pytest_twisted
 from txkoji import Connection
 from txkoji.exceptions import KojiException
 from txkoji.task import Task
+from txkoji.proxy import TrustedProxy
 
 
-class FakeProxy(Proxy):
+class FakeProxy(TrustedProxy):
 
     # Some hard-coded results for some methods:
     results = {
@@ -39,7 +39,7 @@ class FakeProxy(Proxy):
 
 @pytest.fixture
 def koji(monkeypatch):
-    monkeypatch.setattr('txkoji.connection.Proxy', FakeProxy)
+    monkeypatch.setattr('txkoji.connection.TrustedProxy', FakeProxy)
     koji = Connection('mykoji')
     return koji
 

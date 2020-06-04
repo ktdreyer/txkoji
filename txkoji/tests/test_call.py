@@ -10,7 +10,7 @@ class TestCall(object):
     def test_getuser(self, monkeypatch):
         # brew call getUser kdreyer@REDHAT.COM \
         #   --json-output > txkoji/tests/fixtures/calls/getUser.json
-        monkeypatch.setattr('txkoji.connection.Proxy', FakeProxy)
+        monkeypatch.setattr('txkoji.connection.TrustedProxy', FakeProxy)
         koji = Connection('mykoji')
         user = yield koji.getUser('kdreyer')
         expected = Munch(id=2826,

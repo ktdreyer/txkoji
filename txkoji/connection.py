@@ -5,13 +5,13 @@ import re
 from munch import munchify
 import treq
 import treq_kerberos
-from twisted.web.xmlrpc import Proxy
 from twisted.internet import defer
 from twisted.internet import reactor
 from twisted.internet.ssl import PrivateCertificate
 from twisted.web.client import Agent
 from twisted.web.client import BrowserLikePolicyForHTTPS
 from twisted.web.client import ResponseFailed
+from txkoji.proxy import TrustedProxy
 from txkoji.ssl import trustRoot, ClientCertPolicy
 try:
     from configparser import SafeConfigParser
@@ -63,7 +63,8 @@ class Connection(object):
             msg = 'no server configured at %s for %s' % (PROFILES, profile)
             raise ValueError(msg)
         self.trustRoot = trustRoot(self.serverca)
-        self.proxy = Proxy(self.url.encode(), allowNone=True)
+        self.proxy = TrustedProxy(self.url.encode(), allowNone=True,
+                                  trustRoot=self.trustRoot)
         self.proxy.queryFactory = KojiQueryFactory
         self.cache = Cache(self)
         # We populate these on login:

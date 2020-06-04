@@ -14,7 +14,7 @@ class TestGetBuild(object):
         # To create this fixture file:
         # cbs call getBuild 24284 \
         #   --json-output > txkoji/tests/fixtures/calls/getBuild.json
-        monkeypatch.setattr('txkoji.connection.Proxy', FakeProxy)
+        monkeypatch.setattr('txkoji.connection.TrustedProxy', FakeProxy)
         koji = Connection('mykoji')
         d = koji.getBuild(24284)
         return pytest_twisted.blockon(d)
