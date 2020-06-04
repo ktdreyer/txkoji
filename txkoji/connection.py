@@ -57,6 +57,7 @@ class Connection(object):
         self.profile = profile
         self.url = self.lookup(profile, 'server')
         self.weburl = self.lookup(profile, 'weburl')
+        self.serverca = self.lookup(profile, 'serverca')
         if not self.url:
             msg = 'no server configured at %s for %s' % (PROFILES, profile)
             raise ValueError(msg)
@@ -461,9 +462,8 @@ class Connection(object):
 
         trustRoot = None  # Use Twisted's platformTrust().
         # Optionally load "serverca" into a Certificate.
-        servercafile = self.lookup(self.profile, 'serverca')
-        if servercafile:
-            servercafile = os.path.expanduser(servercafile)
+        if self.serverca:
+            servercafile = os.path.expanduser(self.serverca)
             trustRoot = RootCATrustRoot(servercafile)
 
         policy = ClientCertPolicy(trustRoot=trustRoot, client_cert=client_cert)
