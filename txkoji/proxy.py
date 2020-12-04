@@ -6,8 +6,12 @@ from twisted.python.compat import nativeString
 
 
 """
-Twisted's XML-RPC client does not do HTTPS cert verification by default,
-https://twistedmatrix.com/trac/ticket/9836
+In Twisted prior to 20.11.0, the Twisted XML-RPC client did not do any HTTPS
+server cert verification (https://twistedmatrix.com/trac/ticket/9836).
+
+In Twisted 20.11.0 and later, the Twisted XML-RPC verifies the HTTPS server
+cert against the system-wide bundle, but there is no way to verify against a
+specific CA.
 
 The subclasses within this module verify the HTTPS cert against the
 system-wide CA bundle (default) or a specific CA.
@@ -19,6 +23,10 @@ class ErrorCheckingQueryProtocol(QueryProtocol):
     Adds additional error checking in connectionLost
 
     https://twistedmatrix.com/pipermail/twisted-python/2016-June/030466.html
+
+    This functionality is built into Twisted upstream in 20.11.0 and later,
+    https://twistedmatrix.com/trac/ticket/9836.
+    This subclass backports the feature for earlier Twisted versions.
     """
     def connectionLost(self, reason):
         if not reason.check(error.ConnectionDone, error.ConnectionLost):
@@ -48,12 +56,6 @@ class TrustedProxy(Proxy, object):
         # it:
         self.queryFactory.protocol = ErrorCheckingQueryProtocol
         super(TrustedProxy, self).__init__(*args, **kwargs)
-        # We have just called the constructor without a trustRoot kwarg. In
-        # the event that https://github.com/twisted/twisted/pull/1287 merges
-        # upstream, self.trustRoot will always be None. In order to be
-        # compatible with that PR, we must assign self.trustRoot here after
-        # we've called the constructor.
-        self.trustRoot = trustRoot
 
     def callRemote(self, method, *args):
         if not self.secure:
