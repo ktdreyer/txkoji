@@ -1,8 +1,8 @@
 Async interface to Koji, using Twisted
 ======================================
 
-.. image:: https://travis-ci.org/ktdreyer/txkoji.svg?branch=master
-             :target: https://travis-ci.org/ktdreyer/txkoji
+.. image:: https://github.com/ktdreyer/txkoji/workflows/tests/badge.svg
+             :target: https://github.com/ktdreyer/txkoji/actions
 
 .. image:: https://badge.fury.io/py/txkoji.svg
              :target: https://badge.fury.io/py/txkoji
