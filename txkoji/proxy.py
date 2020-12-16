@@ -52,6 +52,7 @@ class TrustedProxy(Proxy, object):
             validate the connection against the system-wide CA bundle.
         """
         trustRoot = kwargs.pop('trustRoot', None)
+        self.trustRoot = trustRoot
         # Update our QueryProtocol to raise ssl.SSL.Error rather than skipping
         # it:
         self.queryFactory.protocol = ErrorCheckingQueryProtocol
