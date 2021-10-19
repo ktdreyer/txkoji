@@ -1,20 +1,14 @@
-from twisted.web.xmlrpc import _QueryFactory, payloadTemplate
+from twisted.web.xmlrpc import QueryFactory, payloadTemplate
 from twisted.python.compat import unicode
 from twisted.internet import defer
 from txkoji.marshaller import KojiMarshaller
 
-"""
-This module uses the private twisted.web.xmlrpc._QueryFactory class. See
-https://twistedmatrix.com/trac/ticket/9350 which tracks making this class a
-public class instead and documenting its use.
-"""
 
-
-class KojiQueryFactory(_QueryFactory):
+class KojiQueryFactory(QueryFactory):
     def __init__(self, path, host, method, user=None, password=None,
                  allowNone=True, args=(), canceller=None, useDateTime=False):
         """
-        Mainly copied from Twisted's _QueryFactory class, except we use our own
+        Mainly copied from Twisted's QueryFactory class, except we use our own
         KojiMarshaller instead of stdlib's xmlrpc Marshaller.
         """
         self.path, self.host = path, host
