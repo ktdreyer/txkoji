@@ -71,8 +71,9 @@ To learn the full Koji XML-RPC API::
 
   koji list-api
 
-You can also read the `koji source code <https://pagure.io/koji/>`_ to find
-out details about how each method works.
+You can also look at the `web interface
+<https://koji.fedoraproject.org/koji/api>`_ or read the `koji source code
+<https://pagure.io/koji/>`_ to find out details about how each method works.
 
 
 Logging in
