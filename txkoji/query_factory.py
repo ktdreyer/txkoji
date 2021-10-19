@@ -1,7 +1,12 @@
-from twisted.web.xmlrpc import QueryFactory, payloadTemplate
+from twisted.web.xmlrpc import payloadTemplate
 from twisted.python.compat import unicode
 from twisted.internet import defer
 from txkoji.marshaller import KojiMarshaller
+try:
+    from twisted.web.xmlrpc import QueryFactory
+except ImportError:
+    # py27 with Twisted v20.3.0
+    from twisted.web.xmlrpc import _QueryFactory as QueryFactory
 
 
 class KojiQueryFactory(QueryFactory):
