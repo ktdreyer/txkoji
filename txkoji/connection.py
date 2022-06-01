@@ -14,11 +14,11 @@ from twisted.web.client import ResponseFailed
 from txkoji.proxy import TrustedProxy
 from txkoji.ssl import trustRoot, ClientCertPolicy
 try:
-    from configparser import SafeConfigParser
+    from configparser import ConfigParser
     from urllib.parse import urlencode, urlparse, parse_qs
     import xmlrpc
 except ImportError:
-    from ConfigParser import SafeConfigParser
+    from ConfigParser import SafeConfigParser as ConfigParser
     from urllib import urlencode
     from urlparse import urlparse, parse_qs
     import xmlrpclib as xmlrpc
@@ -79,7 +79,7 @@ class Connection(object):
         :returns: ``str``, value for this setting
         """
         for path in profiles():
-            cfg = SafeConfigParser()
+            cfg = ConfigParser()
             cfg.read(path)
             if profile not in cfg.sections():
                 continue
@@ -109,7 +109,7 @@ class Connection(object):
             return
         url = url.split(' ', 1)[0]
         for path in profiles():
-            cfg = SafeConfigParser()
+            cfg = ConfigParser()
             cfg.read(path)
             for profile in cfg.sections():
                 if not cfg.has_option(profile, 'weburl'):
