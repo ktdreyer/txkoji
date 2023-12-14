@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, UTC
 from munch import Munch
 import pytest
 from txkoji import Connection
@@ -59,7 +59,7 @@ class TestGetTask(object):
         est_completion = yield task.estimate_completion()
         # Since this build has finished, the estimate_completion() method
         # should simply return the real completed datetime.
-        expected = datetime(2018, 1, 12, 16, 18, 43, 236640)
+        expected = datetime(2018, 1, 12, 16, 18, 43, 236640, UTC)
         assert est_completion == expected
         assert est_completion == task.completed
 

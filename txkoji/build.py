@@ -1,5 +1,5 @@
 import posixpath
-from datetime import datetime
+from datetime import datetime, UTC
 from munch import Munch
 from twisted.internet import defer
 from txkoji import build_states
@@ -17,7 +17,7 @@ class Build(Munch):
         """
         if not self.completion_ts:
             return None
-        return datetime.utcfromtimestamp(self.completion_ts)
+        return datetime.fromtimestamp(self.completion_ts, UTC)
 
     @property
     def started(self):
@@ -26,7 +26,7 @@ class Build(Munch):
 
         :returns: a datetime object for the time this build started
         """
-        return datetime.utcfromtimestamp(self.start_ts)
+        return datetime.fromtimestamp(self.start_ts, UTC)
 
     @property
     def duration(self):
@@ -41,7 +41,7 @@ class Build(Munch):
         if self.completion_ts:
             end = self.completed
         else:
-            end = datetime.utcnow()
+            end = datetime.now(UTC)
         return end - self.started
 
     @property

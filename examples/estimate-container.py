@@ -1,5 +1,5 @@
 from operator import itemgetter
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, UTC
 import sys
 from txkoji import Connection
 from txkoji import task_states
@@ -72,7 +72,7 @@ def estimate_free(koji, task):
 
     avg_duration = yield average_build_duration(koji, task.package)
     remaining = longest + avg_duration
-    est_complete = datetime.utcnow() + remaining
+    est_complete = datetime.now(UTC) + remaining
     defer.returnValue(est_complete)
 
 
@@ -99,7 +99,7 @@ def task_estimates(channel, states):
     # pprint(avg_package_durations)
     # Determine estimates for all our tasks.
     results = []
-    utcnow = datetime.utcnow()
+    utcnow = datetime.now(UTC)
     for task in tasks:
         avg_duration = avg_package_durations[task.package]
         est_complete = task.started + avg_duration
@@ -134,7 +134,7 @@ def log_est_complete(est_complete):
     if not est_complete:
         print('could not determine an estimated completion time')
         return
-    remaining = est_complete - datetime.utcnow()
+    remaining = est_complete - datetime.now(UTC)
     message = 'this task should be complete in %s'
     if remaining.total_seconds() < 0:
         message = 'this task exceeds estimate by %s'

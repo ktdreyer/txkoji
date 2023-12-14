@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, UTC
 import pytest
 from txkoji import Connection
 from txkoji import build_states
@@ -44,6 +44,6 @@ class TestGetBuild(object):
         est_completion = yield build.estimate_completion()
         # Since this build has finished, the estimate_completion() method
         # should simply return the real completed datetime.
-        expected = datetime(2018, 9, 26, 13, 59, 43, 905240)
+        expected = datetime(2018, 9, 26, 13, 59, 43, 905240, UTC)
         assert est_completion == expected
         assert est_completion == build.completed

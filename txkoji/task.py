@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, UTC
 import os.path
 import posixpath
 from munch import Munch, unmunchify
@@ -92,7 +92,7 @@ class Task(Munch):
         """
         if not self.completion_ts:
             return None
-        return datetime.utcfromtimestamp(self.completion_ts)
+        return datetime.fromtimestamp(self.completion_ts, UTC)
 
     @property
     def created(self):
@@ -101,7 +101,7 @@ class Task(Munch):
 
         :returns: a datetime object for the time this task was created
         """
-        return datetime.utcfromtimestamp(self.create_ts)
+        return datetime.fromtimestamp(self.create_ts, UTC)
 
     @property
     def started(self):
@@ -112,7 +112,7 @@ class Task(Munch):
         """
         if not self.start_ts:
             return None
-        return datetime.utcfromtimestamp(self.start_ts)
+        return datetime.fromtimestamp(self.start_ts, UTC)
 
     @property
     def state_name(self):
@@ -138,7 +138,7 @@ class Task(Munch):
         start = self.started
         end = self.completed
         if not end:
-            end = datetime.utcnow()
+            end = datetime.now(UTC)
         return end - start
 
     @defer.inlineCallbacks
