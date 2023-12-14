@@ -9,9 +9,7 @@ jobs:
       max-parallel: 5
       matrix:
         include:
-          - python-version: 3.6
-            os: ubuntu-20.04
-          - python-version: 3.9
+          - python-version: 3.11
             os: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
